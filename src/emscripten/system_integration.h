@@ -17,6 +17,7 @@ struct SystemIntegration : imgui::SystemIntegration {
     void set_context(Context* context) override;
     void set_ui_call(std::function<void(Context*)>&& fun) override;
     void execute_once() override;
+    bool in_cooperative_environment() override;
 
    private:
     Context* context{nullptr};

@@ -15,6 +15,7 @@ struct SystemIntegration {
     virtual void set_renderer(Renderer* rend) = 0;
     virtual void set_ui_call(std::function<void(Context*)>&& f) = 0;
     virtual void execute_once() = 0;
+    virtual bool in_cooperative_environment() = 0;
 };
 
 }  // namespace imgui

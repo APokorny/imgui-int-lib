@@ -4,6 +4,7 @@
 #include <emscripten/html5.h>
 #include <iostream>
 #include "imgui.h"
+#include "imgui/context.h"
 
 namespace ie = imgui::emscripten;
 
@@ -213,6 +214,7 @@ void ie::SystemIntegration::loop() {
     cleanup_imgui_state();
 }
 
+bool ie::SystemIntegration::in_cooperative_environment() { return true; }
 void ie::SystemIntegration::execute_once() { loop(); }
 
 void ie::SystemIntegration::reset_mouse_state() {

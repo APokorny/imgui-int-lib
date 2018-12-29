@@ -2,9 +2,9 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_vulkan.h>
 #include <iostream>
-#include "imgui/renderer.h"
 #include "imgui/context.h"
 #include "imgui/imgui.h"
+#include "imgui/renderer.h"
 
 namespace is = imgui::sdl;
 
@@ -79,8 +79,7 @@ void is::SystemIntegration::cleanup_imgui_state() {
     reset_mouse_state();
 }
 
-void is::SystemIntegration::reset_mouse_state() {
-}
+void is::SystemIntegration::reset_mouse_state() {}
 
 void is::SystemIntegration::update_imgui_state() {
     ImGuiIO& io = ImGui::GetIO();
@@ -120,12 +119,12 @@ void is::SystemIntegration::update_imgui_state() {
         io.MousePos = ImVec2(static_cast<float>(mx), static_cast<float>(my));
 }
 
+bool is::SystemIntegration::in_cooperative_environment() { return false; }
 void is::SystemIntegration::execute_once() { loop(); }
 
 void is::SystemIntegration::set_context(Context* c) { context = c; }
 void is::SystemIntegration::set_renderer(Renderer* r) { renderer = r; }
 
-void is::SystemIntegration::set_ui_call(
-    std::function<void(Context*)>&& f) {
+void is::SystemIntegration::set_ui_call(std::function<void(Context*)>&& f) {
     create_ui = std::move(f);
 }
