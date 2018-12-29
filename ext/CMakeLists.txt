@@ -59,6 +59,8 @@ install(TARGETS ImGui EXPORT imgui-int-Targets
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
     )
+install(PROGRAMS ${imgui-int_BINARY_DIR}/ext/bin/binary_to_compressed_c
+    DESTINATION bin)
 
 install(TARGETS ImGui-cpp EXPORT imgui-int-Targets
     LIBRARY DESTINATION lib

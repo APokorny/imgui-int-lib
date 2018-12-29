@@ -103,7 +103,7 @@ install(TARGETS imgui-int EXPORT imgui-int-Targets
 install(EXPORT imgui-int-Targets
     FILE imgui-int-Targets.cmake
     NAMESPACE Imgui::
-    DESTINATION lib/cmake/Cactus
+    DESTINATION lib/cmake/
     )
 
 include(CMakePackageConfigHelpers)
@@ -111,6 +111,8 @@ write_basic_package_version_file("imgui-int-ConfigVersion.cmake"
     VERSION "${imgui-int_VERSION}"
     COMPATIBILITY SameMajorVersion
     )
-install(FILES "imgui-int-Config.cmake" "imgui-int-ConfigVersion.cmake"
+install(FILES
+    "imgui-int-Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/imgui-int-ConfigVersion.cmake"
     DESTINATION lib/cmake/
     )
