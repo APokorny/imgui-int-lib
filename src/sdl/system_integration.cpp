@@ -128,3 +128,4 @@ void is::SystemIntegration::set_renderer(Renderer* r) { renderer = r; }
 void is::SystemIntegration::set_ui_call(std::function<void(Context*)>&& f) {
     create_ui = std::move(f);
 }
+std::pair<int, int> is::SystemIntegration::window_size() { return {width, height}; }

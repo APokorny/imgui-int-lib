@@ -229,5 +229,8 @@ void ie::SystemIntegration::set_ui_call(std::function<void(Context*)>&& f) {
 }
 
 void ie::SystemIntegration::set_context(imgui::Context* c) { context = c; }
+std::pair<int, int> ie::SystemIntegration::window_size() {
+    return {width, height};
+}
 
 ie::SystemIntegration::~SystemIntegration() = default;

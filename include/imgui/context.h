@@ -29,6 +29,7 @@ struct Context {
     /**
      * \}
      */
+    std::pair<int, int> window_size();
 
    private:
     std::unique_ptr<SystemIntegration> system;

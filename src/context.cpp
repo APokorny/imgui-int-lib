@@ -24,6 +24,7 @@ imgui::Context::Context(std::unique_ptr<SystemIntegration> integration,
 void imgui::Context::run() {
     while (continue_to_run) {
         run_once();
+        if (system->in_cooperative_environment()) return;
     }
 }
 void imgui::Context::run_once() { system->execute_once(); }
@@ -31,3 +32,4 @@ void imgui::Context::run_once() { system->execute_once(); }
 imgui::Context::~Context() = default;
 void imgui::Context::stop() { continue_to_run = false; }
 void imgui::Context::resume() { continue_to_run = true; }
+std::pair<int, int> imgui::Context::window_size() { return system->window_size(); }

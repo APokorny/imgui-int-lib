@@ -15,6 +15,7 @@ struct SystemIntegration : imgui::SystemIntegration {
     void set_ui_call(std::function<void(Context*)>&& fun) override;
     void execute_once() override;
     bool in_cooperative_environment() override;
+    std::pair<int, int> window_size() override;
 
    private:
     void process_event(SDL_Event* const event);
