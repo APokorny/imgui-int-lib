@@ -1,9 +1,8 @@
-project(imgui-int CXX)
+project(imgui-int VERSION 1.0.0 LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.10)
 
 include(ExternalProject)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
-set(imgui-int_VERSION "1.0.0")
 
 
 if(EMSCRIPTEN)
