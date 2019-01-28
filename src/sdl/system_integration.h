@@ -10,6 +10,7 @@ namespace sdl {
 struct SystemIntegration : imgui::SystemIntegration {
     SystemIntegration(SDL_Window* window);
     ~SystemIntegration();
+    void setup_imgui() override;
     void set_context(Context* context) override;
     void set_renderer(Renderer* renderer) override;
     void set_ui_call(std::function<void(Context*)>&& fun) override;

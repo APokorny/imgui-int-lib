@@ -13,6 +13,7 @@ struct SystemIntegration : imgui::SystemIntegration {
     SystemIntegration(size_t width, size_t height);
     ~SystemIntegration();
     void loop();
+    void setup_imgui() override;
     void set_renderer(Renderer* renderer) override;
     void set_context(Context* context) override;
     void set_ui_call(std::function<void(Context*)>&& fun) override;

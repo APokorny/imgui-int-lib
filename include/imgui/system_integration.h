@@ -11,6 +11,7 @@ struct SystemIntegration {
     SystemIntegration& operator=(SystemIntegration const&) = delete;
     virtual ~SystemIntegration() = default;
 
+    virtual void setup_imgui() = 0;
     virtual void set_context(Context* context) = 0;
     virtual void set_renderer(Renderer* rend) = 0;
     virtual void set_ui_call(std::function<void(Context*)>&& f) = 0;

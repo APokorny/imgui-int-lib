@@ -2,6 +2,7 @@
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
+#include <emscripten/key_codes.h>
 #include <iostream>
 #include "imgui.h"
 #include "imgui/context.h"
@@ -16,27 +17,29 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width,
     void* data = this;
     pthread_t this_thread = EM_CALLBACK_THREAD_CONTEXT_CALLING_THREAD;
     emscripten_set_keydown_callback_on_thread(
-        target, data, true,
+        "#window", data, false,
         [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
             ImGuiIO& io = ImGui::GetIO();
+            std::cout << "Key Down " << event->keyCode << std::endl;
             io.KeysDown[event->keyCode & 511] = 1;
             io.KeyCtrl = event->ctrlKey;
             io.KeyShift = event->shiftKey;
             io.KeyAlt = event->altKey;
             io.KeySuper = event->metaKey;
-            return false;
+            return true;
         },
         this_thread);
     emscripten_set_keyup_callback_on_thread(
-        target, data, true,
+        "#window", data, false,
         [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
             ImGuiIO& io = ImGui::GetIO();
+            std::cout << "Key Up " << event->keyCode << std::endl;
             io.KeysDown[event->keyCode & 511] = 0;
             io.KeyCtrl = event->ctrlKey;
             io.KeyShift = event->shiftKey;
             io.KeyAlt = event->altKey;
             io.KeySuper = event->metaKey;
-            return false;
+            return true;
         },
         this_thread);
     emscripten_set_click_callback_on_thread(
@@ -134,24 +137,28 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width,
     emscripten_set_blur_callback_on_thread(
         target, data, true,
         [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            std::cout << "blur callback" << std::endl;
             return 0;
         },
         this_thread);
     emscripten_set_focus_callback_on_thread(
         target, data, true,
         [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            std::cout << "focus callback" << std::endl;
             return 0;
         },
         this_thread);
     emscripten_set_focusin_callback_on_thread(
         target, data, true,
         [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            std::cout << "focus in callback" << std::endl;
             return 0;
         },
         this_thread);
     emscripten_set_focusout_callback_on_thread(
         target, data, true,
         [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            std::cout << "focus out in callback" << std::endl;
             return 0;
         },
         this_thread);
@@ -172,6 +179,31 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width,
             self->loop();
         },
         this, 0, 0);
+}
+
+void ie::SystemIntegration::setup_imgui() {
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeyMap[ImGuiKey_Tab] = DOM_VK_TAB;
+    io.KeyMap[ImGuiKey_LeftArrow] = DOM_VK_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = DOM_VK_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow] = DOM_VK_UP;
+    io.KeyMap[ImGuiKey_DownArrow] = DOM_VK_DOWN;
+    io.KeyMap[ImGuiKey_PageUp] = DOM_VK_PAGE_UP;
+    io.KeyMap[ImGuiKey_PageDown] = DOM_VK_PAGE_DOWN;
+    io.KeyMap[ImGuiKey_Home] = DOM_VK_HOME;
+    io.KeyMap[ImGuiKey_End] = DOM_VK_END;
+    io.KeyMap[ImGuiKey_Insert] = DOM_VK_INSERT;
+    io.KeyMap[ImGuiKey_Delete] = DOM_VK_DELETE;
+    io.KeyMap[ImGuiKey_Backspace] = DOM_VK_BACK_SPACE;
+    io.KeyMap[ImGuiKey_Space] = DOM_VK_SPACE;
+    io.KeyMap[ImGuiKey_Enter] = DOM_VK_ENTER;
+    io.KeyMap[ImGuiKey_Escape] = DOM_VK_ESCAPE;
+    io.KeyMap[ImGuiKey_A] = DOM_VK_A;
+    io.KeyMap[ImGuiKey_C] = DOM_VK_C;
+    io.KeyMap[ImGuiKey_V] = DOM_VK_V;
+    io.KeyMap[ImGuiKey_X] = DOM_VK_X;
+    io.KeyMap[ImGuiKey_Y] = DOM_VK_Y;
+    io.KeyMap[ImGuiKey_Z] = DOM_VK_Z;
 }
 
 void ie::SystemIntegration::update_imgui_state() {
