@@ -1,7 +1,6 @@
 #include "system_integration.h"
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_vulkan.h>
-#include <iostream>
 #include "imgui/context.h"
 #include "imgui/imgui.h"
 #include "imgui/renderer.h"
@@ -62,7 +61,6 @@ void is::SystemIntegration::process_event(SDL_Event* const event) {
         case SDL_KEYDOWN:  // fallthrough
         case SDL_KEYUP:
             int key = event->key.keysym.scancode;
-            std::cout << "scan code " << event->key.keysym.scancode << std::endl;
             IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
             io.KeysDown[key] = (event->type == SDL_KEYDOWN);
             io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);

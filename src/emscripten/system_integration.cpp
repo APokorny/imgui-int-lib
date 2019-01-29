@@ -3,7 +3,6 @@
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #include <emscripten/key_codes.h>
-#include <iostream>
 #include "imgui.h"
 #include "imgui/context.h"
 
@@ -184,357 +183,372 @@ enum HIDKeyCodes {
     Keyboard_RightAlt,             // 0xE6
     Keyboard_Right_GUI             // 0xE7
 };
-
-static const uint32_t emscripten_scancode_table[] = {
-    /*  0 */ UNMAPPED,
-    /*  1 */ UNMAPPED,
-    /*  2 */ UNMAPPED,
-    /*  3 */ Keyboard_Cancel,
-    /*  4 */ UNMAPPED,
-    /*  5 */ UNMAPPED,
-    /*  6 */ Keyboard_Menu,
-    /*  7 */ UNMAPPED,
-    /*  8 */ Key_Backspace,
-    /*  9 */ Key_Tab,
-    /*  10 */ UNMAPPED,
-    /*  11 */ UNMAPPED,
-    /*  12 */ UNMAPPED,
-    /*  13 */ Key_Return,
-    /*  14 */ UNMAPPED,
-    /*  15 */ UNMAPPED,
-    /*  16 */ Keyboard_LeftShift,
-    /*  17 */ Keyboard_LeftControl,
-    /*  18 */ Keyboard_LeftAlt,
-    /*  19 */ Key_Pause,
-    /*  20 */ Key_CapsLock,
-    /*  21 */ UNMAPPED,
-    /*  22 */ UNMAPPED,
-    /*  23 */ UNMAPPED,
-    /*  24 */ UNMAPPED,
-    /*  25 */ UNMAPPED,
-    /*  26 */ UNMAPPED,
-    /*  27 */ Key_ESCAPE,
-    /*  28 */ UNMAPPED,
-    /*  29 */ UNMAPPED,
-    /*  30 */ UNMAPPED,
-    /*  31 */ UNMAPPED,
-    /*  32 */ Key_Spacebar,
-    /*  33 */ Key_PageUp,
-    /*  34 */ Key_PageDown,
-    /*  35 */ Key_End,
-    /*  36 */ Key_Home,
-    /*  37 */ Key_LeftArrow,
-    /*  38 */ Key_UpArrow,
-    /*  39 */ Key_RightArrow,
-    /*  40 */ Key_DownArrow,
-    /*  41 */ UNMAPPED,
-    /*  42 */ UNMAPPED,
-    /*  43 */ UNMAPPED,
-    /*  44 */ UNMAPPED,
-    /*  45 */ Key_Insert,
-    /*  46 */ Key_Delete_Forward,
-    /*  47 */ UNMAPPED,
-    /*  48 */ Key_0,
-    /*  49 */ Key_1,
-    /*  50 */ Key_2,
-    /*  51 */ Key_3,
-    /*  52 */ Key_4,
-    /*  53 */ Key_5,
-    /*  54 */ Key_6,
-    /*  55 */ Key_7,
-    /*  56 */ Key_8,
-    /*  57 */ Key_9,
-    /*  58 */ UNMAPPED,
-    /*  59 */ Key_Semicolon,
-    /*  60 */ UNMAPPED,
-    /*  61 */ Key_Equals,
-    /*  62 */ UNMAPPED,
-    /*  63 */ UNMAPPED,
-    /*  64 */ UNMAPPED,
-    /*  65 */ Key_A,
-    /*  66 */ Key_B,
-    /*  67 */ Key_C,
-    /*  68 */ Key_D,
-    /*  69 */ Key_E,
-    /*  70 */ Key_F,
-    /*  71 */ Key_G,
-    /*  72 */ Key_H,
-    /*  73 */ Key_I,
-    /*  74 */ Key_J,
-    /*  75 */ Key_K,
-    /*  76 */ Key_L,
-    /*  77 */ Key_M,
-    /*  78 */ Key_N,
-    /*  79 */ Key_O,
-    /*  80 */ Key_P,
-    /*  81 */ Key_Q,
-    /*  82 */ Key_R,
-    /*  83 */ Key_S,
-    /*  84 */ Key_T,
-    /*  85 */ Key_U,
-    /*  86 */ Key_V,
-    /*  87 */ Key_W,
-    /*  88 */ Key_X,
-    /*  89 */ Key_Y,
-    /*  90 */ Key_Z,
-    /*  91 */ Keyboard_Left_GUI,
-    /*  92 */ UNMAPPED,
-    /*  93 */ Keyboard_Application,
-    /*  94 */ UNMAPPED,
-    /*  95 */ UNMAPPED,
-    /*  96 */ Keypad_0,
-    /*  97 */ Keypad_1,
-    /*  98 */ Keypad_2,
-    /*  99 */ Keypad_3,
-    /* 100 */ Keypad_4,
-    /* 101 */ Keypad_5,
-    /* 102 */ Keypad_6,
-    /* 103 */ Keypad_7,
-    /* 104 */ Keypad_8,
-    /* 105 */ Keypad_9,
-    /* 106 */ Keypad_Multiply,
-    /* 107 */ Keypad_Plus,
-    /* 108 */ UNMAPPED,
-    /* 109 */ Keypad_Minus,
-    /* 110 */ Keypad_Comma,
-    /* 111 */ Keypad_Divide,
-    /* 112 */ Key_F1,
-    /* 113 */ Key_F2,
-    /* 114 */ Key_F3,
-    /* 115 */ Key_F4,
-    /* 116 */ Key_F5,
-    /* 117 */ Key_F6,
-    /* 118 */ Key_F7,
-    /* 119 */ Key_F8,
-    /* 120 */ Key_F9,
-    /* 121 */ Key_F10,
-    /* 122 */ Key_F11,
-    /* 123 */ Key_F12,
-    /* 124 */ Key_F13,
-    /* 125 */ Key_F14,
-    /* 126 */ Key_F15,
-    /* 127 */ Key_F16,
-    /* 128 */ Key_F17,
-    /* 129 */ Key_F18,
-    /* 130 */ Key_F19,
-    /* 131 */ Key_F20,
-    /* 132 */ Key_F21,
-    /* 133 */ Key_F22,
-    /* 134 */ Key_F23,
-    /* 135 */ Key_F24,
-    /* 136 */ UNMAPPED,
-    /* 137 */ UNMAPPED,
-    /* 138 */ UNMAPPED,
-    /* 139 */ UNMAPPED,
-    /* 140 */ UNMAPPED,
-    /* 141 */ UNMAPPED,
-    /* 142 */ UNMAPPED,
-    /* 143 */ UNMAPPED,
-    /* 144 */ Keypad_NumLock,
-    /* 145 */ Key_Scroll_Lock,
-    /* 146 */ UNMAPPED,
-    /* 147 */ UNMAPPED,
-    /* 148 */ UNMAPPED,
-    /* 149 */ UNMAPPED,
-    /* 150 */ UNMAPPED,
-    /* 151 */ UNMAPPED,
-    /* 152 */ UNMAPPED,
-    /* 153 */ UNMAPPED,
-    /* 154 */ UNMAPPED,
-    /* 155 */ UNMAPPED,
-    /* 156 */ UNMAPPED,
-    /* 157 */ UNMAPPED,
-    /* 158 */ UNMAPPED,
-    /* 159 */ UNMAPPED,
-    /* 160 */ UNMAPPED,
-    /* 161 */ UNMAPPED,
-    /* 162 */ UNMAPPED,
-    /* 163 */ UNMAPPED,
-    /* 164 */ UNMAPPED,
-    /* 165 */ UNMAPPED,
-    /* 166 */ UNMAPPED,
-    /* 167 */ UNMAPPED,
-    /* 168 */ UNMAPPED,
-    /* 169 */ UNMAPPED,
-    /* 170 */ UNMAPPED,
-    /* 171 */ UNMAPPED,
-    /* 172 */ UNMAPPED,
-    /* 173 */ Keypad_Minus,         /*FX*/
-    /* 174 */ Keyboard_Volume_Down, /*IE, Chrome*/
-    /* 175 */ Keyboard_Volume_Up,   /*IE, Chrome*/
-    /* 176 */ UNMAPPED,             /*IE, Chrome*/
-    /* 177 */ UNMAPPED,             /*IE, Chrome*/
-    /* 178 */ UNMAPPED,
-    /* 179 */ UNMAPPED, /*IE, Chrome*/
-    /* 180 */ UNMAPPED,
-    /* 181 */ UNMAPPED,             /*FX*/
-    /* 182 */ Keyboard_Volume_Down, /*FX*/
-    /* 183 */ Keyboard_Volume_Up,   /*FX*/
-    /* 184 */ UNMAPPED,
-    /* 185 */ UNMAPPED,
-    /* 186 */ Key_Semicolon, /*IE, Chrome, D3E legacy*/
-    /* 187 */ Key_Equals,    /*IE, Chrome, D3E legacy*/
-    /* 188 */ Key_Comma,
-    /* 189 */ Key_Minus, /*IE, Chrome, D3E legacy*/
-    /* 190 */ Key_Dot,
-    /* 191 */ Key_Slash,
-    /* 192 */ Key_Grave, /*FX, D3E legacy (SDL_SCANCODE_APOSTROPHE in IE/Chrome)*/
-    /* 193 */ UNMAPPED,
-    /* 194 */ UNMAPPED,
-    /* 195 */ UNMAPPED,
-    /* 196 */ UNMAPPED,
-    /* 197 */ UNMAPPED,
-    /* 198 */ UNMAPPED,
-    /* 199 */ UNMAPPED,
-    /* 200 */ UNMAPPED,
-    /* 201 */ UNMAPPED,
-    /* 202 */ UNMAPPED,
-    /* 203 */ UNMAPPED,
-    /* 204 */ UNMAPPED,
-    /* 205 */ UNMAPPED,
-    /* 206 */ UNMAPPED,
-    /* 207 */ UNMAPPED,
-    /* 208 */ UNMAPPED,
-    /* 209 */ UNMAPPED,
-    /* 210 */ UNMAPPED,
-    /* 211 */ UNMAPPED,
-    /* 212 */ UNMAPPED,
-    /* 213 */ UNMAPPED,
-    /* 214 */ UNMAPPED,
-    /* 215 */ UNMAPPED,
-    /* 216 */ UNMAPPED,
-    /* 217 */ UNMAPPED,
-    /* 218 */ UNMAPPED,
-    /* 219 */ Key_LeftBrace,
-    /* 220 */ Key_Backslash,
-    /* 221 */ Key_RightBrace,
-    /* 222 */ Key_Apostrophe, /*FX, D3E legacy*/
+struct KeyInfo {
+    uint32_t code;
+    bool printable{false};
 };
 
-uint32_t to_scancode(uint32_t key_code) {
-    if (key_code >= sizeof(emscripten_scancode_table) / sizeof(uint32_t)) return emscripten_scancode_table[key_code];
-    return UNMAPPED;
+static KeyInfo const emscripten_scancode_table[] = {
+    /*  0 */ {UNMAPPED, false},
+    /*  1 */ {UNMAPPED, false},
+    /*  2 */ {UNMAPPED, false},
+    /*  3 */ {Keyboard_Cancel, false},
+    /*  4 */ {UNMAPPED, false},
+    /*  5 */ {UNMAPPED, false},
+    /*  6 */ {Keyboard_Menu, false},
+    /*  7 */ {UNMAPPED, false},
+    /*  8 */ {Key_Backspace, false},
+    /*  9 */ {Key_Tab, false},
+    /*  10 */ {UNMAPPED, false},
+    /*  11 */ {UNMAPPED, false},
+    /*  12 */ {UNMAPPED, false},
+    /*  13 */ {Key_Return, false},
+    /*  14 */ {UNMAPPED, false},
+    /*  15 */ {UNMAPPED, false},
+    /*  16 */ {Keyboard_LeftShift, false},
+    /*  17 */ {Keyboard_LeftControl, false},
+    /*  18 */ {Keyboard_LeftAlt, false},
+    /*  19 */ {Key_Pause, false},
+    /*  20 */ {Key_CapsLock, false},
+    /*  21 */ {UNMAPPED, false},
+    /*  22 */ {UNMAPPED, false},
+    /*  23 */ {UNMAPPED, false},
+    /*  24 */ {UNMAPPED, false},
+    /*  25 */ {UNMAPPED, false},
+    /*  26 */ {UNMAPPED, false},
+    /*  27 */ {Key_ESCAPE, false},
+    /*  28 */ {UNMAPPED, false},
+    /*  29 */ {UNMAPPED, false},
+    /*  30 */ {UNMAPPED, false},
+    /*  31 */ {UNMAPPED, false},
+    /*  32 */ {Key_Spacebar, true},
+    /*  33 */ {Key_PageUp, false},
+    /*  34 */ {Key_PageDown, false},
+    /*  35 */ {Key_End, false},
+    /*  36 */ {Key_Home, false},
+    /*  37 */ {Key_LeftArrow, false},
+    /*  38 */ {Key_UpArrow, false},
+    /*  39 */ {Key_RightArrow, false},
+    /*  40 */ {Key_DownArrow, false},
+    /*  41 */ {UNMAPPED, false},
+    /*  42 */ {UNMAPPED, false},
+    /*  43 */ {UNMAPPED, false},
+    /*  44 */ {UNMAPPED, false},
+    /*  45 */ {Key_Insert, false},
+    /*  46 */ {Key_Delete_Forward, false},
+    /*  47 */ {UNMAPPED, false},
+    /*  48 */ {Key_0, true},
+    /*  49 */ {Key_1, true},
+    /*  50 */ {Key_2, true},
+    /*  51 */ {Key_3, true},
+    /*  52 */ {Key_4, true},
+    /*  53 */ {Key_5, true},
+    /*  54 */ {Key_6, true},
+    /*  55 */ {Key_7, true},
+    /*  56 */ {Key_8, true},
+    /*  57 */ {Key_9, true},
+    /*  58 */ {UNMAPPED, false},
+    /*  59 */ {Key_Semicolon, true},
+    /*  60 */ {UNMAPPED, false},
+    /*  61 */ {Key_Equals, true},
+    /*  62 */ {UNMAPPED, false},
+    /*  63 */ {UNMAPPED, false},
+    /*  64 */ {UNMAPPED, false},
+    /*  65 */ {Key_A, true},
+    /*  66 */ {Key_B, true},
+    /*  67 */ {Key_C, true},
+    /*  68 */ {Key_D, true},
+    /*  69 */ {Key_E, true},
+    /*  70 */ {Key_F, true},
+    /*  71 */ {Key_G, true},
+    /*  72 */ {Key_H, true},
+    /*  73 */ {Key_I, true},
+    /*  74 */ {Key_J, true},
+    /*  75 */ {Key_K, true},
+    /*  76 */ {Key_L, true},
+    /*  77 */ {Key_M, true},
+    /*  78 */ {Key_N, true},
+    /*  79 */ {Key_O, true},
+    /*  80 */ {Key_P, true},
+    /*  81 */ {Key_Q, true},
+    /*  82 */ {Key_R, true},
+    /*  83 */ {Key_S, true},
+    /*  84 */ {Key_T, true},
+    /*  85 */ {Key_U, true},
+    /*  86 */ {Key_V, true},
+    /*  87 */ {Key_W, true},
+    /*  88 */ {Key_X, true},
+    /*  89 */ {Key_Y, true},
+    /*  90 */ {Key_Z, true},
+    /*  91 */ {Keyboard_Left_GUI, false},
+    /*  92 */ {UNMAPPED, false},
+    /*  93 */ {Keyboard_Application, false},
+    /*  94 */ {UNMAPPED, false},
+    /*  95 */ {UNMAPPED, false},
+    /*  96 */ {Keypad_0, true},
+    /*  97 */ {Keypad_1, true},
+    /*  98 */ {Keypad_2, true},
+    /*  99 */ {Keypad_3, true},
+    /* 100 */ {Keypad_4, true},
+    /* 101 */ {Keypad_5, true},
+    /* 102 */ {Keypad_6, true},
+    /* 103 */ {Keypad_7, true},
+    /* 104 */ {Keypad_8, true},
+    /* 105 */ {Keypad_9, true},
+    /* 106 */ {Keypad_Multiply, true},
+    /* 107 */ {Keypad_Plus, true},
+    /* 108 */ {UNMAPPED, false},
+    /* 109 */ {Keypad_Minus, true},
+    /* 110 */ {Keypad_Comma, true},
+    /* 111 */ {Keypad_Divide, true},
+    /* 112 */ {Key_F1, false},
+    /* 113 */ {Key_F2, false},
+    /* 114 */ {Key_F3, false},
+    /* 115 */ {Key_F4, false},
+    /* 116 */ {Key_F5, false},
+    /* 117 */ {Key_F6, false},
+    /* 118 */ {Key_F7, false},
+    /* 119 */ {Key_F8, false},
+    /* 120 */ {Key_F9, false},
+    /* 121 */ {Key_F10, false},
+    /* 122 */ {Key_F11, false},
+    /* 123 */ {Key_F12, false},
+    /* 124 */ {Key_F13, false},
+    /* 125 */ {Key_F14, false},
+    /* 126 */ {Key_F15, false},
+    /* 127 */ {Key_F16, false},
+    /* 128 */ {Key_F17, false},
+    /* 129 */ {Key_F18, false},
+    /* 130 */ {Key_F19, false},
+    /* 131 */ {Key_F20, false},
+    /* 132 */ {Key_F21, false},
+    /* 133 */ {Key_F22, false},
+    /* 134 */ {Key_F23, false},
+    /* 135 */ {Key_F24, false},
+    /* 136 */ {UNMAPPED, false},
+    /* 137 */ {UNMAPPED, false},
+    /* 138 */ {UNMAPPED, false},
+    /* 139 */ {UNMAPPED, false},
+    /* 140 */ {UNMAPPED, false},
+    /* 141 */ {UNMAPPED, false},
+    /* 142 */ {UNMAPPED, false},
+    /* 143 */ {UNMAPPED, false},
+    /* 144 */ {Keypad_NumLock, false},
+    /* 145 */ {Key_Scroll_Lock, false},
+    /* 146 */ {UNMAPPED, false},
+    /* 147 */ {UNMAPPED, false},
+    /* 148 */ {UNMAPPED, false},
+    /* 149 */ {UNMAPPED, false},
+    /* 150 */ {UNMAPPED, false},
+    /* 151 */ {UNMAPPED, false},
+    /* 152 */ {UNMAPPED, false},
+    /* 153 */ {UNMAPPED, false},
+    /* 154 */ {UNMAPPED, false},
+    /* 155 */ {UNMAPPED, false},
+    /* 156 */ {UNMAPPED, false},
+    /* 157 */ {UNMAPPED, false},
+    /* 158 */ {UNMAPPED, false},
+    /* 159 */ {UNMAPPED, false},
+    /* 160 */ {UNMAPPED, false},
+    /* 161 */ {UNMAPPED, false},
+    /* 162 */ {UNMAPPED, false},
+    /* 163 */ {UNMAPPED, false},
+    /* 164 */ {UNMAPPED, false},
+    /* 165 */ {UNMAPPED, false},
+    /* 166 */ {UNMAPPED, false},
+    /* 167 */ {UNMAPPED, false},
+    /* 168 */ {UNMAPPED, false},
+    /* 169 */ {UNMAPPED, false},
+    /* 170 */ {UNMAPPED, false},
+    /* 171 */ {UNMAPPED, false},
+    /* 172 */ {UNMAPPED, false},
+    /* 173 */ {Keypad_Minus, true},          /*FX*/
+    /* 174 */ {Keyboard_Volume_Down, false}, /*IE, Chrome*/
+    /* 175 */ {Keyboard_Volume_Up, false},   /*IE, Chrome*/
+    /* 176 */ {UNMAPPED, false},             /*IE, Chrome*/
+    /* 177 */ {UNMAPPED, false},             /*IE, Chrome*/
+    /* 178 */ {UNMAPPED, false},
+    /* 179 */ {UNMAPPED, false}, /*IE, Chrome*/
+    /* 180 */ {UNMAPPED, false},
+    /* 181 */ {UNMAPPED, false},             /*FX*/
+    /* 182 */ {Keyboard_Volume_Down, false}, /*FX*/
+    /* 183 */ {Keyboard_Volume_Up, false},   /*FX*/
+    /* 184 */ {UNMAPPED, false},
+    /* 185 */ {UNMAPPED, false},
+    /* 186 */ {Key_Semicolon, false}, /*IE, Chrome, D3E legacy*/
+    /* 187 */ {Key_Equals, true},     /*IE, Chrome, D3E legacy*/
+    /* 188 */ {Key_Comma, true},
+    /* 189 */ {Key_Minus, true}, /*IE, Chrome, D3E legacy*/
+    /* 190 */ {Key_Dot, true},
+    /* 191 */ {Key_Slash, true},
+    /* 192 */ {Key_Grave, false}, /*FX, D3E legacy (SDL_SCANCODE_APOSTROPHE in IE/Chrome)*/
+    /* 193 */ {UNMAPPED, false},
+    /* 194 */ {UNMAPPED, false},
+    /* 195 */ {UNMAPPED, false},
+    /* 196 */ {UNMAPPED, false},
+    /* 197 */ {UNMAPPED, false},
+    /* 198 */ {UNMAPPED, false},
+    /* 199 */ {UNMAPPED, false},
+    /* 200 */ {UNMAPPED, false},
+    /* 201 */ {UNMAPPED, false},
+    /* 202 */ {UNMAPPED, false},
+    /* 203 */ {UNMAPPED, false},
+    /* 204 */ {UNMAPPED, false},
+    /* 205 */ {UNMAPPED, false},
+    /* 206 */ {UNMAPPED, false},
+    /* 207 */ {UNMAPPED, false},
+    /* 208 */ {UNMAPPED, false},
+    /* 209 */ {UNMAPPED, false},
+    /* 210 */ {UNMAPPED, false},
+    /* 211 */ {UNMAPPED, false},
+    /* 212 */ {UNMAPPED, false},
+    /* 213 */ {UNMAPPED, false},
+    /* 214 */ {UNMAPPED, false},
+    /* 215 */ {UNMAPPED, false},
+    /* 216 */ {UNMAPPED, false},
+    /* 217 */ {UNMAPPED, false},
+    /* 218 */ {UNMAPPED, false},
+    /* 219 */ {Key_LeftBrace, true},
+    /* 220 */ {Key_Backslash, true},
+    /* 221 */ {Key_RightBrace, true},
+    /* 222 */ {Key_Apostrophe, false}, /*FX, D3E legacy*/
+};
+
+auto to_scancode(uint32_t key_code) {
+    if (key_code < sizeof(emscripten_scancode_table) / sizeof(uint32_t)) return emscripten_scancode_table[key_code];
+    return KeyInfo{UNMAPPED, false};
 }
 
 ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_height) : create_ui{[](Context*) {}} {
     emscripten_set_canvas_element_size("", initial_width, initial_height);
-    char const* target = nullptr;
+    char const* target = "#window";
     void* data = this;
     pthread_t this_thread = EM_CALLBACK_THREAD_CONTEXT_CALLING_THREAD;
-    emscripten_set_keydown_callback_on_thread("#window", data, false,
-                                              [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
-                                                  ImGuiIO& io = ImGui::GetIO();
-                                                  auto scan_code = to_scancode(event->keyCode);
-                                                  std::cout << "Key Down " << event->keyCode << " scancode:" << scan_code << " location "
-                                                            << event->location << event->locale << "  cV:" << event->charValue
-                                                            << "  cC:" << event->charCode << "  which:" << event->which << std::endl;
-                                                  io.KeysDown[scan_code & 511] = 1;
-                                                  io.KeyCtrl = event->ctrlKey;
-                                                  io.KeyShift = event->shiftKey;
-                                                  io.KeyAlt = event->altKey;
-                                                  io.KeySuper = event->metaKey;
-                                                  return true;
-                                              },
-                                              this_thread);
-    emscripten_set_keyup_callback_on_thread("#window", data, false,
-                                            [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
-                                                ImGuiIO& io = ImGui::GetIO();
-                                                auto scan_code = to_scancode(event->keyCode);
-                                                std::cout << "Key Up " << event->keyCode << std::endl;
-                                                io.KeysDown[scan_code & 511] = 0;
-                                                io.KeyCtrl = event->ctrlKey;
-                                                io.KeyShift = event->shiftKey;
-                                                io.KeyAlt = event->altKey;
-                                                io.KeySuper = event->metaKey;
-                                                return true;
-                                            },
-                                            this_thread);
-    emscripten_set_click_callback_on_thread(target, data, true,
-                                            [](int type, EmscriptenMouseEvent const* event, void*) -> int { return false; }, this_thread);
-    emscripten_set_mousedown_callback_on_thread(target, data, true,
-                                                [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
-                                                    ImGuiIO& io = ImGui::GetIO();
-                                                    SystemIntegration* self = static_cast<SystemIntegration*>(obj);
-                                                    self->mouse_status[event->button] = 1;
-                                                    return false;
-                                                },
-                                                this_thread);
+    emscripten_set_keydown_callback_on_thread(
+        "#document", data, 0,
+        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            auto scan_code = to_scancode(event->keyCode);
+            if (scan_code.printable)
+                io.AddInputCharactersUTF8(event->key);
+            if (scan_code.code == UNMAPPED)
+                return EMSCRIPTEN_RESULT_FAILED;
+            io.KeysDown[scan_code.code & 511] = 1;
+            io.KeyCtrl = event->ctrlKey;
+            io.KeyShift = event->shiftKey;
+            io.KeyAlt = event->altKey;
+            io.KeySuper = event->metaKey;
+            return EMSCRIPTEN_RESULT_SUCCESS;
+        },
+        this_thread);
+    emscripten_set_keyup_callback_on_thread(
+        "#document", data, 0,
+        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            auto scan_code = to_scancode(event->keyCode);
+            if (scan_code.printable)
+                io.AddInputCharactersUTF8(event->key);
+            if (scan_code.code == UNMAPPED)
+                return EMSCRIPTEN_RESULT_FAILED;
+            io.KeysDown[scan_code.code & 511] = 0;
+            io.KeyCtrl = event->ctrlKey;
+            io.KeyShift = event->shiftKey;
+            io.KeyAlt = event->altKey;
+            io.KeySuper = event->metaKey;
+            return EMSCRIPTEN_RESULT_SUCCESS;
+        },
+        this_thread);
+    emscripten_set_click_callback_on_thread(
+        target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return false; }, this_thread);
+    emscripten_set_mousedown_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            SystemIntegration* self = static_cast<SystemIntegration*>(obj);
+            self->mouse_status[event->button] = 1;
+            return false;
+        },
+        this_thread);
 
-    emscripten_set_mouseup_callback_on_thread(target, data, true,
-                                              [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
-                                                  ImGuiIO& io = ImGui::GetIO();
-                                                  SystemIntegration* self = static_cast<SystemIntegration*>(obj);
-                                                  self->mouse_status[event->button] = 2;
+    emscripten_set_mouseup_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            SystemIntegration* self = static_cast<SystemIntegration*>(obj);
+            self->mouse_status[event->button] = 2;
 
-                                                  return false;
-                                              },
-                                              this_thread);
-    emscripten_set_dblclick_callback_on_thread(target, data, true,
-                                               [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
-    emscripten_set_mousemove_callback_on_thread(target, data, true,
-                                                [](int type, EmscriptenMouseEvent const* event, void*) -> int {
-                                                    ImGuiIO& io = ImGui::GetIO();
-                                                    io.MousePos =
-                                                        ImVec2(static_cast<float>(event->canvasX), static_cast<float>(event->canvasY));
-                                                    return 0;
-                                                },
-                                                this_thread);
-    emscripten_set_mouseenter_callback_on_thread(target, data, true,
-                                                 [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
-    emscripten_set_mouseleave_callback_on_thread(target, data, true,
-                                                 [](int type, EmscriptenMouseEvent const* event, void*) -> int {
-                                                     ImGuiIO& io = ImGui::GetIO();
-                                                     io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-                                                     return 0;
-                                                 },
-                                                 this_thread);
-    emscripten_set_mouseover_callback_on_thread(target, data, true,
-                                                [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
-    emscripten_set_mouseout_callback_on_thread(target, data, true,
-                                               [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
-    emscripten_set_wheel_callback_on_thread(target, data, true,
-                                            [](int type, EmscriptenWheelEvent const* event, void*) -> int {
-                                                ImGuiIO& io = ImGui::GetIO();
-                                                io.MouseWheel += event->deltaY;
-                                                io.MouseWheelH += event->deltaX;
+            return false;
+        },
+        this_thread);
+    emscripten_set_dblclick_callback_on_thread(
+        target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
+    emscripten_set_mousemove_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenMouseEvent const* event, void*) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            io.MousePos = ImVec2(static_cast<float>(event->canvasX), static_cast<float>(event->canvasY));
+            return 0;
+        },
+        this_thread);
+    emscripten_set_mouseenter_callback_on_thread(
+        target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
+    emscripten_set_mouseleave_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenMouseEvent const* event, void*) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+            return 0;
+        },
+        this_thread);
+    emscripten_set_mouseover_callback_on_thread(
+        target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
+    emscripten_set_mouseout_callback_on_thread(
+        target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
+    emscripten_set_wheel_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenWheelEvent const* event, void*) -> int {
+            ImGuiIO& io = ImGui::GetIO();
+            io.MouseWheel += event->deltaY;
+            io.MouseWheelH += event->deltaX;
 
-                                                return 0;
-                                            },
-                                            this_thread);
-    emscripten_set_resize_callback_on_thread(target, data, true,
-                                             [](int type, EmscriptenUiEvent const* event, void* obj) -> int {
-                                                 SystemIntegration* self = static_cast<SystemIntegration*>(obj);
-                                                 self->width = event->windowInnerWidth;
-                                                 self->height = event->windowInnerHeight;
-                                                 return 0;
-                                             },
-                                             this_thread);
-    emscripten_set_scroll_callback_on_thread(target, data, true, [](int type, EmscriptenUiEvent const* event, void*) -> int { return 0; },
-                                             this_thread);
-    emscripten_set_blur_callback_on_thread(target, data, true,
-                                           [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-                                               std::cout << "blur callback" << std::endl;
-                                               return 0;
-                                           },
-                                           this_thread);
-    emscripten_set_focus_callback_on_thread(target, data, true,
-                                            [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-                                                std::cout << "focus callback" << std::endl;
-                                                return 0;
-                                            },
-                                            this_thread);
-    emscripten_set_focusin_callback_on_thread(target, data, true,
-                                              [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-                                                  std::cout << "focus in callback" << std::endl;
-                                                  return 0;
-                                              },
-                                              this_thread);
-    emscripten_set_focusout_callback_on_thread(target, data, true,
-                                               [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-                                                   std::cout << "focus out in callback" << std::endl;
-                                                   return 0;
-                                               },
-                                               this_thread);
+            return 0;
+        },
+        this_thread);
+    emscripten_set_resize_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenUiEvent const* event, void* obj) -> int {
+            SystemIntegration* self = static_cast<SystemIntegration*>(obj);
+            self->width = event->windowInnerWidth;
+            self->height = event->windowInnerHeight;
+            return 0;
+        },
+        this_thread);
+    emscripten_set_scroll_callback_on_thread(
+        target, data, true, [](int type, EmscriptenUiEvent const* event, void*) -> int { return 0; }, this_thread);
+    emscripten_set_blur_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            return 0;
+        },
+        this_thread);
+    emscripten_set_focus_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            return 0;
+        },
+        this_thread);
+    emscripten_set_focusin_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            return 0;
+        },
+        this_thread);
+    emscripten_set_focusout_callback_on_thread(
+        target, data, true,
+        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
+            return 0;
+        },
+        this_thread);
     emscripten_set_deviceorientation_callback_on_thread(
         data, true, [](int type, EmscriptenDeviceOrientationEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_devicemotion_callback_on_thread(
@@ -549,27 +563,27 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
 
 void ie::SystemIntegration::setup_imgui() {
     ImGuiIO& io = ImGui::GetIO();
-    io.KeyMap[ImGuiKey_Tab] = DOM_VK_TAB;
-    io.KeyMap[ImGuiKey_LeftArrow] = DOM_VK_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = DOM_VK_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = DOM_VK_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = DOM_VK_DOWN;
-    io.KeyMap[ImGuiKey_PageUp] = DOM_VK_PAGE_UP;
-    io.KeyMap[ImGuiKey_PageDown] = DOM_VK_PAGE_DOWN;
-    io.KeyMap[ImGuiKey_Home] = DOM_VK_HOME;
-    io.KeyMap[ImGuiKey_End] = DOM_VK_END;
-    io.KeyMap[ImGuiKey_Insert] = DOM_VK_INSERT;
-    io.KeyMap[ImGuiKey_Delete] = DOM_VK_DELETE;
-    io.KeyMap[ImGuiKey_Backspace] = DOM_VK_BACK_SPACE;
-    io.KeyMap[ImGuiKey_Space] = DOM_VK_SPACE;
-    io.KeyMap[ImGuiKey_Enter] = DOM_VK_ENTER;
-    io.KeyMap[ImGuiKey_Escape] = DOM_VK_ESCAPE;
-    io.KeyMap[ImGuiKey_A] = DOM_VK_A;
-    io.KeyMap[ImGuiKey_C] = DOM_VK_C;
-    io.KeyMap[ImGuiKey_V] = DOM_VK_V;
-    io.KeyMap[ImGuiKey_X] = DOM_VK_X;
-    io.KeyMap[ImGuiKey_Y] = DOM_VK_Y;
-    io.KeyMap[ImGuiKey_Z] = DOM_VK_Z;
+    io.KeyMap[ImGuiKey_Tab] = Key_Tab;
+    io.KeyMap[ImGuiKey_LeftArrow] = Key_LeftArrow;
+    io.KeyMap[ImGuiKey_RightArrow] = Key_RightArrow;
+    io.KeyMap[ImGuiKey_UpArrow] = Key_UpArrow;
+    io.KeyMap[ImGuiKey_DownArrow] = Key_DownArrow;
+    io.KeyMap[ImGuiKey_PageUp] = Key_PageUp;
+    io.KeyMap[ImGuiKey_PageDown] = Key_PageDown;
+    io.KeyMap[ImGuiKey_Home] = Key_Home;
+    io.KeyMap[ImGuiKey_End] = Key_End;
+    io.KeyMap[ImGuiKey_Insert] = Key_Insert;
+    io.KeyMap[ImGuiKey_Delete] = Key_Delete_Forward;
+    io.KeyMap[ImGuiKey_Backspace] = Key_Backspace;
+    io.KeyMap[ImGuiKey_Space] = Key_Spacebar;
+    io.KeyMap[ImGuiKey_Enter] = Key_Return;
+    io.KeyMap[ImGuiKey_Escape] = Key_ESCAPE;
+    io.KeyMap[ImGuiKey_A] = Key_A;
+    io.KeyMap[ImGuiKey_C] = Key_C;
+    io.KeyMap[ImGuiKey_V] = Key_V;
+    io.KeyMap[ImGuiKey_X] = Key_X;
+    io.KeyMap[ImGuiKey_Y] = Key_Y;
+    io.KeyMap[ImGuiKey_Z] = Key_Z;
 }
 
 void ie::SystemIntegration::update_imgui_state() {
@@ -578,7 +592,6 @@ void ie::SystemIntegration::update_imgui_state() {
 
     emscripten_get_canvas_element_size("", &width, &height);
     if (width * height == 0) {
-        std::cout << "no frame size" << std::endl;
         return;
     }
     io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
