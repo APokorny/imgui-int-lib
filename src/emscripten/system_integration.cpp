@@ -446,8 +446,6 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
             ImGuiIO& io = ImGui::GetIO();
             auto scan_code = to_scancode(event->keyCode);
-            if (scan_code.printable)
-                io.AddInputCharactersUTF8(event->key);
             if (scan_code.code == UNMAPPED)
                 return EMSCRIPTEN_RESULT_FAILED;
             io.KeysDown[scan_code.code & 511] = 0;
