@@ -45,6 +45,7 @@ add_library(imgui-int
     include/imgui/system_integration.h
     src/context.cpp
     src/default_style.cpp
+    src/data_time_widgets.cpp
     src/ui.cpp)
 add_library(Imgui::imgui-int ALIAS imgui-int)
 
