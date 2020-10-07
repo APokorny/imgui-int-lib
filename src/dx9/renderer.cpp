@@ -111,7 +111,7 @@ void idx9::Renderer::pre_frame()
     D3DCOLOR clear_col_dx = D3DCOLOR_RGBA(static_cast<int>(clear_color.x * 255.0f), static_cast<int>(clear_color.y * 255.0f),
                                           static_cast<int>(clear_color.z * 255.0f), static_cast<int>(clear_color.w * 255.0f));
     d3d_device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
-    if (d3d_device->BeginScene() < 0) { std::cerr << "Failed to begin DX9 scene\n" return;}
+    if (d3d_device->BeginScene() < 0) { std::cerr << "Failed to begin DX9 scene\n"; return;}
 }
 
 void idx9::Renderer::render_imgui_data(ImDrawData& draw_data)
