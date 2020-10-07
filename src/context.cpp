@@ -18,6 +18,7 @@ imgui::Context::Context(std::unique_ptr<SystemIntegration> integration,
     system->set_ui_call(std::move(fun));
 
     system->setup_imgui();
+    renderer->setup_imgui();
     renderer->acquire_cached_resources();
     style->apply_style();
 }

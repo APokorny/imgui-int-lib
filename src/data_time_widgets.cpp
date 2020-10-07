@@ -92,7 +92,11 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
         const int days_last_mo = detail::days_in_month(this_mon == 0 ? last_year : this_year, last_mon);
         auto      first_mo     = std::chrono::system_clock::to_time_t(time_point{std::chrono::floor<months>(t.to_duration())});
         std::tm   ts;
+#ifdef WIN32
+        localtime_s(&ts, &first_mo);
+#else
         localtime_r(&first_mo, &ts);
+#endif
         const int first_wd = ts.tm_wday;
         // month year
         snprintf(buff, 32, "%s %d", names_mo[this_mon], this_year);

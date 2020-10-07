@@ -4,7 +4,10 @@
 #include "imgui/style.h"
 #include "imgui/system_integration.h"
 
-#if defined(EMSCRIPTEN)
+#if defined(WIN32)
+#include "win32/system_integration.h"
+#include "win32/select_win32_renderer.h"
+#elif defined(EMSCRIPTEN)
 #include <emscripten.h>
 #include <emscripten/html5.h>
 #include "emscripten/system_integration.h"
@@ -38,7 +41,12 @@ auto construct_gl_renderer() {
 std::unique_ptr<imgui::Context> imgui::create_ui(
     std::function<void(imgui::Context*)>&& fun, std::unique_ptr<Style> style,
     size_t initial_width, size_t initial_height) {
-#ifdef EMSCRIPTEN
+#ifdef WIN32
+    auto sys = win32::select_win32_setup(initial_width, initial_height);
+    return std::make_unique<Context>(std::move(sys.first),
+                                         std::move(sys.second),
+                                         std::move(style), std::move(fun));
+#elif defined(EMSCRIPTEN)
     return std::make_unique<imgui::Context>(
         std::make_unique<emscripten::SystemIntegration>(initial_width,
                                                         initial_height),

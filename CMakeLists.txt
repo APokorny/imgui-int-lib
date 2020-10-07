@@ -19,6 +19,8 @@ if(EMSCRIPTEN)
     set(GL_LIBRARIES GL)
 
     set(EMSCRIPTEN_ENABLED ON)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 else()
     find_package(PkgConfig)
 
@@ -60,6 +62,16 @@ if(EMSCRIPTEN)
     target_link_libraries(imgui-int PUBLIC GL) # TODO GL finder does not support emscripten yet..
     target_include_directories(imgui-int PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/emscripten>)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    target_sources(imgui-int
+        PRIVATE
+           src/win32/select_win32_renderer.cpp
+           src/win32/select_win32_renderer.h
+           src/win32/system_integration.cpp
+           src/win32/system_integration.h
+           src/dx9/renderer.cpp
+           src/dx9/renderer.h)
+    target_link_libraries(imgui-int PRIVATE d3d9 dinput wsock32)
 elseif(GL_FOUND AND GLEW_FOUND)
     target_sources(imgui-int
         PRIVATE
@@ -69,7 +81,7 @@ elseif(GL_FOUND AND GLEW_FOUND)
     target_compile_options(imgui-int PRIVATE -DGL)
 endif()
 
-if(SDL_FOUND)
+if(SDL_FOUND AND NOT WIN32)
     target_sources(imgui-int
         PRIVATE
            src/sdl/select_sdl_renderer.h
