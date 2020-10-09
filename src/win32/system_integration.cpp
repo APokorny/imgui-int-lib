@@ -137,7 +137,7 @@ void iw::SystemIntegration::setup_imgui()
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;  // We can honor GetMouseCursor() values (optional)
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;   // We can honor io.WantSetMousePos requests (optional, rarely used)
     io.BackendPlatformName = "imgui_impl_win32";
-    io.ImeWindowHandle     = window_handle;
+    io.ImeWindowHandle = window_handle;
 
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array that we will update during the application
     // lifetime.
@@ -205,13 +205,15 @@ void iw::SystemIntegration::reset_mouse_state() {}
 
 void iw::SystemIntegration::update_imgui_state()
 {
-    auto& io = ImGui::GetIO();
-    // io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f)
+    auto& io                   = ImGui::GetIO();
+    io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
     // Setup display size (every frame to accommodate for window resizing)
     RECT rect;
     ::GetClientRect(window_handle, &rect);
-    io.DisplaySize = ImVec2(static_cast<float>(rect.right - rect.left), static_cast<float>(rect.bottom - rect.top));
+    width          = rect.right - rect.left;
+    height         = rect.bottom - rect.top;
+    io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
 
     // Setup time step
     INT64 current_time;
