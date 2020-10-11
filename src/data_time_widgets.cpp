@@ -67,6 +67,7 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
     ImGuiStyle&    style   = ImGui::GetStyle();
     ImVec4         col_txt = style.Colors[ImGuiCol_Text];
     ImVec4         col_dis = style.Colors[ImGuiCol_TextDisabled];
+    ImVec4         col_hi  = style.Colors[ImGuiCol_ButtonActive];
     const float    ht      = ImGui::GetFrameHeight();
     ImVec2         cell_size(ht * 1.25f, ht);
     char           buff[32];
@@ -155,6 +156,9 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
                     ImGui::PushStyleColor(ImGuiCol_Button, col_dis);
                     ImGui::PushStyleColor(ImGuiCol_Text, col_txt);
                 }
+                auto on_selected_day = mo == 1 && days{day} == t.d_;
+                if (on_selected_day)
+                    ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
                 ImGui::PushID(i * 7 + j);
                 snprintf(buff, 32, "%d", day);
                 if (now_yr == min_yr - 1 || now_yr == max_yr + 1) { ImGui::Dummy(cell_size); }
@@ -168,6 +172,7 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
                 ImGui::PopID();
                 if (t1_or_t2) ImGui::PopStyleColor(2);
                 if (off_mo) ImGui::PopStyleColor();
+                if (on_selected_day) ImGui::PopStyleColor();
                 if (j != 6) ImGui::SameLine();
                 day++;
             }
