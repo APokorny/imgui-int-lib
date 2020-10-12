@@ -156,9 +156,10 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
                     ImGui::PushStyleColor(ImGuiCol_Button, col_dis);
                     ImGui::PushStyleColor(ImGuiCol_Text, col_txt);
                 }
-                auto on_selected_day = mo == 1 && days{day} == t.d_;
-                if (on_selected_day)
-                    ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
+                auto on_selected_day = ((mo == 0 && t.m_.count() == last_mon) || (mo == 1 && t.m_.count() == now_mo) ||
+                                        (mo == 2 && t.m_.count() == next_mon)) &&
+                                       days{day - 1} == t.d_;
+                if (on_selected_day) ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
                 ImGui::PushID(i * 7 + j);
                 snprintf(buff, 32, "%d", day);
                 if (now_yr == min_yr - 1 || now_yr == max_yr + 1) { ImGui::Dummy(cell_size); }
@@ -166,7 +167,7 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
                 {
                     t.y_    = years{now_yr - 1970};
                     t.m_    = months{now_mo};
-                    t.d_    = days{now_md};
+                    t.d_    = days{now_md - 1};
                     changed = true;
                 }
                 ImGui::PopID();
