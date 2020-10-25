@@ -59,11 +59,6 @@ struct ymdhms
     }
 };
 
-std::ostream& operator<<(std::ostream& out, ymdhms const& t)
-{
-    return out << int(t.day) << '.' << int(t.month) << '.' << t.year << " " << int(t.hour) << ':' << int(t.minute) << ':' << int(t.second);
-}
-
 ymdhms from_duration(duration in)
 {
     auto const dp = std::chrono::duration_cast<days>(in);
@@ -273,66 +268,82 @@ bool imgui::date_picker(const char* id, int& level, imgui::time_point& to_edit, 
             ++t.year;
             apply();
         }
-        if (this_mo) ImGui::PopStyleColor();
-        if (t1_or_t2) ImGui::PopStyleColor();
-        if (mo % 4) ImGui::SameLine();
-    }
-}
-// month widget
-else if (level == 2)
-{
-    t.day   = 1;
-    t.month = 1;
-    int yr  = t.year - t.year % 20;
-    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-    snprintf(buff, 32, "%d-%d", yr, yr + 19);
-    ImGui::Button(buff);
-    ImGui::PopItemFlag();
-    ImGui::SameLine(5 * cell_size.x);
-    if (ImGui::ArrowButtonEx("##Up", ImGuiDir_Up, cell_size, ImGuiButtonFlags_None) && yr - 20 > min_yr)
-    {
-        t.year -= 20;
-        apply();
-    }
-    ImGui::SameLine();
-    if (ImGui::ArrowButtonEx("##Down", ImGuiDir_Down, cell_size, ImGuiButtonFlags_None) && yr + 20 < max_yr)
-    {
-        t.year += 20;
-        apply();
-    }
-    // ImGui::Dummy(cell_size);
-    cell_size.x *= 7.0f / 4.0f;
-    cell_size.y *= 7.0f / 5.0f;
-    for (int i = 0; i < 5; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
+        // ImGui::Dummy(cell_size);
+        cell_size.x *= 7.0f / 4.0f;
+        cell_size.y *= 7.0f / 3.0f;
+        for (int mo = 1; mo < 13; ++mo)
         {
-            const bool t1_or_t2 = t1.year == yr || t2.year == yr;
-            const bool cur_yr   = t.year == yr;
+            const bool t1_or_t2 = (t1.month == mo && t1.year == t.year) || (t2.month == mo && t2.year == t.year);
+            const bool this_mo  = t.month == mo;
             if (t1_or_t2) ImGui::PushStyleColor(ImGuiCol_Button, col_dis);
-            if (cur_yr) ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
-            snprintf(buff, 32, "%d", yr);
-            if (yr < 1970 || yr > 3000) { ImGui::Dummy(cell_size); }
-            else if (ImGui::Button(buff, cell_size))
+            if (this_mo) ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
+            if (ImGui::Button(abrv_month_name(mo), cell_size) && !changed)
             {
-                t.year  = yr;
-                level   = 1;
                 changed = true;
+                t.month = mo;
+                level   = 0;
             }
-            if (cur_yr) ImGui::PopStyleColor();
             if (t1_or_t2) ImGui::PopStyleColor();
-            if (j != 3) ImGui::SameLine();
-            yr++;
+            if (this_mo) ImGui::PopStyleColor();
+            if (t1_or_t2) ImGui::PopStyleColor();
+            if (mo % 4) ImGui::SameLine();
         }
     }
-}
-ImGui::PopStyleVar();
-ImGui::PopStyleColor();
-ImGui::EndGroup();
-ImGui::PopID();
+    // month widget
+    else if (level == 2)
+    {
+        t.day   = 1;
+        t.month = 1;
+        int yr  = t.year - t.year % 20;
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        snprintf(buff, 32, "%d-%d", yr, yr + 19);
+        ImGui::Button(buff);
+        ImGui::PopItemFlag();
+        ImGui::SameLine(5 * cell_size.x);
+        if (ImGui::ArrowButtonEx("##Up", ImGuiDir_Up, cell_size, ImGuiButtonFlags_None) && yr - 20 > min_yr)
+        {
+            t.year -= 20;
+            apply();
+        }
+        ImGui::SameLine();
+        if (ImGui::ArrowButtonEx("##Down", ImGuiDir_Down, cell_size, ImGuiButtonFlags_None) && yr + 20 < max_yr)
+        {
+            t.year += 20;
+            apply();
+        }
+        // ImGui::Dummy(cell_size);
+        cell_size.x *= 7.0f / 4.0f;
+        cell_size.y *= 7.0f / 5.0f;
+        for (int i = 0; i < 5; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                const bool t1_or_t2 = t1.year == yr || t2.year == yr;
+                const bool cur_yr   = t.year == yr;
+                if (t1_or_t2) ImGui::PushStyleColor(ImGuiCol_Button, col_dis);
+                if (cur_yr) ImGui::PushStyleColor(ImGuiCol_Button, col_hi);
+                snprintf(buff, 32, "%d", yr);
+                if (yr < 1970 || yr > 3000) { ImGui::Dummy(cell_size); }
+                else if (ImGui::Button(buff, cell_size))
+                {
+                    t.year  = yr;
+                    level   = 1;
+                    changed = true;
+                }
+                if (cur_yr) ImGui::PopStyleColor();
+                if (t1_or_t2) ImGui::PopStyleColor();
+                if (j != 3) ImGui::SameLine();
+                yr++;
+            }
+        }
+    }
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor();
+    ImGui::EndGroup();
+    ImGui::PopID();
 
-if (changed) apply();
-return changed;
+    if (changed) apply();
+    return changed;
 }
 
 bool imgui::day_time_picker(char const* id, imgui::time_point& to_edit)
