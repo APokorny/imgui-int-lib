@@ -40,20 +40,22 @@ auto construct_gl_renderer() {
 
 std::unique_ptr<imgui::Context> imgui::create_ui(
     std::function<void(imgui::Context*)>&& fun, std::unique_ptr<Style> style,
+    std::string const& window_name,
     size_t initial_width, size_t initial_height) {
 #ifdef WIN32
-    auto sys = win32::select_win32_setup(initial_width, initial_height);
+    auto sys = win32::select_win32_setup(initial_width, initial_height, window_name);
     return std::make_unique<Context>(std::move(sys.first),
                                          std::move(sys.second),
                                          std::move(style), std::move(fun));
 #elif defined(EMSCRIPTEN)
     return std::make_unique<imgui::Context>(
-        std::make_unique<emscripten::SystemIntegration>(initial_width,
+        std::make_unique<emscripten::SystemIntegration>(
+            initial_width,
                                                         initial_height),
         construct_gl_renderer(), std::move(style), std::move(fun));
 #elif defined(SDL)
     {
-        auto sys = sdl::select_sdl_setup(initial_width, initial_height);
+        auto sys = sdl::select_sdl_setup(initial_width, initial_height, window_name);
         return std::make_unique<Context>(std::move(sys.first),
                                          std::move(sys.second),
                                          std::move(style), std::move(fun));

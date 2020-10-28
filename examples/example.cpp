@@ -67,6 +67,6 @@ int                             main()
                 ImGui::End();
             }
         },
-        std::make_unique<imgui::DefaultStyle>(), 1200, 800);
+        std::make_unique<imgui::DefaultStyle>(), "ImGui Example", 1200, 800);
     ui_context->run();
 }

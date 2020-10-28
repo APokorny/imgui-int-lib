@@ -46,12 +46,12 @@ std::pair<int,std::string> run_gl_init() {
 }  // namespace
 
 std::pair<std::unique_ptr<imgui::SystemIntegration>, std::unique_ptr<imgui::Renderer>>
-is::select_sdl_setup(size_t initial_width, size_t initial_height) {
+is::select_sdl_setup(size_t initial_width, size_t initial_height, std::string const& wn) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
         throw std::runtime_error("error");
     auto version = run_gl_init();
     auto try_window = SDL_CreateWindow(
-        "window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, initial_width,
+        wn.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, initial_width,
         initial_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (try_window) {
