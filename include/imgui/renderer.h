@@ -5,9 +5,8 @@
 struct ImDrawData;
 namespace imgui
 {
-class Renderer
+struct Renderer
 {
-   public:
     Renderer()          = default;
     virtual ~Renderer() = default;
     //! Call after initial setup of imgui

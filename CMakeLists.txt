@@ -10,7 +10,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/ ${CMAKE_MODULE_PA
 
 
 if(EMSCRIPTEN)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     set(VULKAN_ENABLED OFF)
     set(GL3_ENABLED OFF)
     set(GL2_ENABLED OFF)
@@ -20,7 +19,6 @@ if(EMSCRIPTEN)
 
     set(EMSCRIPTEN_ENABLED ON)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 else()
     find_package(PkgConfig)
 

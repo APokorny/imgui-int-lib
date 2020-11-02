@@ -39,6 +39,7 @@ void create_dx9_device(LPDIRECT3D9& d9, D3DPRESENT_PARAMETERS& params, HWND wind
     params.BackBufferFormat       = D3DFMT_UNKNOWN;
     params.EnableAutoDepthStencil = TRUE;
     params.AutoDepthStencilFormat = D3DFMT_D16;
+    params.Flags                  = D3DPRESENTFLAG_DEVICECLIP;
     params.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;  // Present with vsync
     // params.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
     if (d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &dev) < 0)
@@ -56,8 +57,8 @@ idx9::Renderer::Renderer(HWND window) : window(window) { create_dx9_device(direc
 
 void idx9::Renderer::resize(size_t width, size_t height)
 {
-    d3d_parameters.BackBufferWidth  = width;
-    d3d_parameters.BackBufferHeight = height;
+    d3d_parameters.BackBufferWidth = width;
+    d3d_parameters.BackBufferHeight =height;
     reset_device();
 }
 
@@ -116,17 +117,21 @@ void idx9::Renderer::setup_renderer_state(ImDrawData& draw_data)
 void idx9::Renderer::pre_frame()
 {
     // Clear:
-    d3d_device->SetRenderState(D3DRS_ZENABLE, FALSE);
-    d3d_device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    d3d_device->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+    auto ret = d3d_device->SetRenderState(D3DRS_ZENABLE, FALSE);
+    ret = d3d_device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+    ret = d3d_device->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
     D3DCOLOR clear_col_dx = D3DCOLOR_RGBA(static_cast<int>(clear_color.x * 255.0f), static_cast<int>(clear_color.y * 255.0f),
                                           static_cast<int>(clear_color.z * 255.0f), static_cast<int>(clear_color.w * 255.0f));
     d3d_device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
     if (d3d_device->BeginScene() < 0)
     {
-        std::cerr << "Failed to begin DX9 scene\n";
+	invalidate_device_objects();
+        clear_d3d9(direct3d9, d3d_device);
+        create_dx9_device(direct3d9, d3d_parameters, window, d3d_device);
+	create_device_objects();
         return;
     }
+
 }
 
 void idx9::Renderer::render_imgui_data(ImDrawData& draw_data)
@@ -218,7 +223,7 @@ void idx9::Renderer::render_imgui_data(ImDrawData& draw_data)
         const ImDrawList* cmd_list = draw_data.CmdLists[n];
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
         {
-            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+		const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
             if (pcmd->UserCallback != NULL)
             {
                 // User callback, registered via ImDrawList::AddCallback()
@@ -274,8 +279,6 @@ void idx9::Renderer::create_device_objects()
 
     // Store our identifier
     io.Fonts->TexID = (ImTextureID)font_texture;
-
-    return;
 }
 
 void idx9::Renderer::invalidate_device_objects()
@@ -324,7 +327,11 @@ void idx9::Renderer::setup_imgui()
     io.BackendRendererName = "imgui_impl_dx9";
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;  // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 }
-void idx9::Renderer::acquire_cached_resources() { create_device_objects(); }
+
+void idx9::Renderer::acquire_cached_resources()
+{
+    create_device_objects();
+}
 
 void idx9::Renderer::reset_device()
 {
