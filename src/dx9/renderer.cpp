@@ -12,36 +12,47 @@ struct CUSTOMVERTEX
     D3DCOLOR col;
     float    uv[2];
 };
-}  // namespace
-#define D3DFVF_CUSTOMVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+constexpr auto D3DFVF_CUSTOMVERTEX = (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
 
-idx9::Renderer::Renderer(HWND window)
+void clear_d3d9(LPDIRECT3D9& d9, LPDIRECT3DDEVICE9& dev)
 {
-    if ((direct3d9 = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr) return;
+    if(dev)
+        dev->Release();
+    if(d9)
+        d9->Release();
+    d9 = nullptr;
+    dev = nullptr;
+}
+
+void create_dx9_device(LPDIRECT3D9& d9, D3DPRESENT_PARAMETERS& params, HWND window, LPDIRECT3DDEVICE9& dev)
+{
+    if ((d9 = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr) return;
 
     auto clean_on_error = [](auto thing) -> void {
         thing->Release();
         thing = nullptr;
     };
     // Create the D3DDevice
-    ZeroMemory(&d3d_parameters, sizeof(d3d_parameters));
-    d3d_parameters.Windowed               = TRUE;
-    d3d_parameters.SwapEffect             = D3DSWAPEFFECT_DISCARD;
-    d3d_parameters.BackBufferFormat       = D3DFMT_UNKNOWN;
-    d3d_parameters.EnableAutoDepthStencil = TRUE;
-    d3d_parameters.AutoDepthStencilFormat = D3DFMT_D16;
-    d3d_parameters.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;  // Present with vsync
-    // d3d_parameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
-    if (direct3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3d_parameters,
-                                &d3d_device) < 0)
+    ZeroMemory(&params, sizeof(params));
+    params.Windowed               = TRUE;
+    params.SwapEffect             = D3DSWAPEFFECT_DISCARD;
+    params.BackBufferFormat       = D3DFMT_UNKNOWN;
+    params.EnableAutoDepthStencil = TRUE;
+    params.AutoDepthStencilFormat = D3DFMT_D16;
+    params.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;  // Present with vsync
+    // params.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
+    if (d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &dev) < 0)
     {
         std::cerr << "Failed to create DX9 device\n";
-        clean_on_error(direct3d9);
+        clean_on_error(d9);
         return;
     }
 
-    d3d_device->AddRef();
+    dev->AddRef();
 }
+}  // namespace
+
+idx9::Renderer::Renderer(HWND window) : window(window) { create_dx9_device(direct3d9, d3d_parameters, window, d3d_device); }
 
 void idx9::Renderer::resize(size_t width, size_t height)
 {
@@ -111,7 +122,11 @@ void idx9::Renderer::pre_frame()
     D3DCOLOR clear_col_dx = D3DCOLOR_RGBA(static_cast<int>(clear_color.x * 255.0f), static_cast<int>(clear_color.y * 255.0f),
                                           static_cast<int>(clear_color.z * 255.0f), static_cast<int>(clear_color.w * 255.0f));
     d3d_device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
-    if (d3d_device->BeginScene() < 0) { std::cerr << "Failed to begin DX9 scene\n"; return;}
+    if (d3d_device->BeginScene() < 0)
+    {
+        std::cerr << "Failed to begin DX9 scene\n";
+        return;
+    }
 }
 
 void idx9::Renderer::render_imgui_data(ImDrawData& draw_data)
@@ -308,17 +323,16 @@ void idx9::Renderer::setup_imgui()
     ImGuiIO& io            = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_dx9";
     io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;  // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
-
 }
-void idx9::Renderer::acquire_cached_resources()
-{
-    create_device_objects();
-}
+void idx9::Renderer::acquire_cached_resources() { create_device_objects(); }
 
 void idx9::Renderer::reset_device()
 {
     invalidate_device_objects();
-    /*HRESULT hr = d3d_device->Reset(&d3d_parameters);
-    if (hr == D3DERR_INVALIDCALL) IM_ASSERT(0);*/
+    HRESULT hr = d3d_device->Reset(&d3d_parameters);
+    if (hr == D3DERR_INVALIDCALL) {
+        clear_d3d9(direct3d9, d3d_device);
+        create_dx9_device(direct3d9, d3d_parameters, window, d3d_device);
+    }
     create_device_objects();
 }

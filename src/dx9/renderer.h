@@ -30,6 +30,7 @@ struct Renderer : imgui::Renderer
     void                    reset_device();
     void                    invalidate_device_objects();
     void                    setup_renderer_state(ImDrawData& draw_data);
+    HWND                    window;
     LPDIRECT3D9             direct3d9{nullptr};
     D3DPRESENT_PARAMETERS   d3d_parameters;
     LPDIRECT3DDEVICE9       d3d_device{nullptr};
