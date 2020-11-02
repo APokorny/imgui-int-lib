@@ -49,6 +49,8 @@ add_library(imgui-int
     src/ui.cpp)
 add_library(Imgui::imgui-int ALIAS imgui-int)
 
+target_compile_features(imgui-int PRIVATE cxx_std_17)
+
 if(EMSCRIPTEN)
     target_sources(imgui-int
         PRIVATE
