@@ -39,7 +39,6 @@ void create_dx9_device(LPDIRECT3D9& d9, D3DPRESENT_PARAMETERS& params, HWND wind
     params.BackBufferFormat       = D3DFMT_UNKNOWN;
     params.EnableAutoDepthStencil = TRUE;
     params.AutoDepthStencilFormat = D3DFMT_D16;
-    params.Flags                  = D3DPRESENTFLAG_DEVICECLIP;
     params.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;  // Present with vsync
     // params.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
     if (d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &dev) < 0)
