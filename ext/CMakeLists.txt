@@ -1,16 +1,20 @@
 add_library(ImGui
     imgui/imgui.h
+    imgui/imgui.cpp
     imgui/imgui_internal.h
+    imgui/imgui_tables.cpp
+    imgui/imgui_widgets.cpp
     imgui/imstb_rectpack.h
     imgui/imstb_textedit.h
     imgui/imstb_truetype.h
-    imgui/imgui.cpp
     imgui/imgui_draw.cpp
-    imgui/imgui_widgets.cpp
     imgui/imgui_demo.cpp  # only for example
     )
 
-target_include_directories(ImGui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+target_include_directories(ImGui PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/imgui>
+    $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/>)
 
 add_library(ImGui-cpp
@@ -68,3 +72,22 @@ install(TARGETS ImGui-cpp EXPORT imgui-int-Targets
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
     )
+
+add_library(imgui-node-editor
+    imgui-node-editor/crude_json.h
+    imgui-node-editor/crude_json.cpp
+    imgui-node-editor/imgui_bezier_math.h
+    imgui-node-editor/imgui_bezier_math.inl
+    imgui-node-editor/imgui_canvas.h
+    imgui-node-editor/imgui_extra_math.h
+    imgui-node-editor/imgui_extra_math.inl
+    imgui-node-editor/imgui_node_editor.h
+    imgui-node-editor/imgui_node_editor_internal.h
+    imgui-node-editor/imgui_node_editor_internal.inl
+    imgui-node-editor/imgui_canvas.cpp
+    imgui-node-editor/imgui_node_editor.cpp
+    imgui-node-editor/imgui_node_editor_api.cpp
+    )
+target_link_libraries(imgui-node-editor PUBLIC ImGui)
+target_include_directories(imgui-node-editor PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/imgui-node-editor/>)
