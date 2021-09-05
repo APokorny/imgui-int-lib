@@ -24,7 +24,6 @@ else()
 
     pkg_check_modules(GL IMPORTED_TARGET gl)
     pkg_check_modules(SDL IMPORTED_TARGET sdl2)
-    pkg_check_modules(GLEW IMPORTED_TARGET glew)
     pkg_check_modules(FT IMPORTED_TARGET freetype2)
     pkg_check_modules(VULKAN IMPORTED_TARGET vulkan)
 
@@ -49,11 +48,16 @@ add_library(imgui-int
     src/ui.cpp)
 add_library(Imgui::imgui-int ALIAS imgui-int)
 
+target_include_directories(imgui-int PRIVATE ext/imgui/backends/)
 target_compile_features(imgui-int PRIVATE cxx_std_17)
 
 if(EMSCRIPTEN)
     target_sources(imgui-int
         PRIVATE
+          ext/imgui/backends/imgui_impl_opengl3.h
+          ext/imgui/backends/imgui_impl_opengl3.cpp
+          ext/imgui/backends/imgui_impl_sdl.h
+          ext/imgui/backends/imgui_impl_sdl.cpp
           src/gl/renderer.cpp
           src/gl/renderer.h
           src/emscripten/system_integration.cpp
@@ -65,6 +69,17 @@ if(EMSCRIPTEN)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_sources(imgui-int
         PRIVATE
+           ext/imgui/backends/imgui_impl_dx9.h
+           ext/imgui/backends/imgui_impl_dx9.cpp
+           # make this runtime selectable?
+           #ext/imgui/backends/imgui_impl_dx10.h
+           #ext/imgui/backends/imgui_impl_dx10.cpp
+           #ext/imgui/backends/imgui_impl_dx11.h
+           #ext/imgui/backends/imgui_impl_dx11.cpp
+           #ext/imgui/backends/imgui_impl_dx12.h
+           #ext/imgui/backends/imgui_impl_dx12.cpp
+           ext/imgui/backends/imgui_impl_win32.h
+           ext/imgui/backends/imgui_impl_win32.cpp
            src/win32/select_win32_renderer.cpp
            src/win32/select_win32_renderer.h
            src/win32/system_integration.cpp
@@ -72,13 +87,24 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
            src/dx9/renderer.cpp
            src/dx9/renderer.h)
     target_link_libraries(imgui-int PRIVATE d3d9 dinput wsock32)
-elseif(GL_FOUND AND GLEW_FOUND)
+elseif(GL_FOUND)
     target_sources(imgui-int
         PRIVATE
+           ext/imgui/backends/imgui_impl_opengl3.h
+           ext/imgui/backends/imgui_impl_opengl3.cpp
            src/gl/renderer.cpp
            src/gl/renderer.h)
-    target_link_libraries(imgui-int PRIVATE PkgConfig::GL PkgConfig::GLEW)
+    target_link_libraries(imgui-int PRIVATE PkgConfig::GL dl)
     target_compile_options(imgui-int PRIVATE -DGL)
+elseif(VULKAN_FOUND)
+    target_sources(imgui-int
+        PRIVATE
+           ext/imgui/backends/imgui_impl_vulkan.h
+           ext/imgui/backends/imgui_impl_vulkan.cpp
+           src/vulkan/renderer.cpp
+           src/vulkan/renderer.h)
+    target_link_libraries(imgui-int PRIVATE PkgConfig::VULKAN)
+    target_compile_options(imgui-int PRIVATE -DVULKAN)
 endif()
 
 if(SDL_FOUND AND NOT WIN32)
@@ -86,6 +112,8 @@ if(SDL_FOUND AND NOT WIN32)
         PRIVATE
            src/sdl/select_sdl_renderer.h
            src/sdl/select_sdl_renderer.cpp
+           ext/imgui/backends/imgui_impl_sdl.h
+           ext/imgui/backends/imgui_impl_sdl.cpp
            src/sdl/system_integration.cpp
            src/sdl/system_integration.h)
     target_link_libraries(imgui-int PRIVATE PkgConfig::SDL)

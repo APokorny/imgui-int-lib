@@ -19,7 +19,6 @@ struct SystemIntegration : imgui::SystemIntegration {
     std::pair<int, int> window_size() override;
 
    private:
-    void process_event(SDL_Event* const event);
     void reset_mouse_state();
     void loop();
     void update_imgui_state();
