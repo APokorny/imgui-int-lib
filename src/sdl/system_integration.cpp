@@ -46,10 +46,17 @@ void is::SystemIntegration::loop()
         create_ui(context);
         ImGui::EndFrame();
         ImGui::Render();
-        renderer->render_imgui_data(*ImGui::GetDrawData());
-        renderer->finish_frame();
 
-        SDL_GL_SwapWindow(window);
+        auto       draw_data    = ImGui::GetDrawData();
+        const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
+        if (!is_minimized)
+        {
+        renderer->pre_frame();
+            renderer->render_imgui_data(*draw_data);
+            renderer->finish_frame();
+
+            SDL_GL_SwapWindow(window);
+        }
 
         reset_mouse_state();
     }

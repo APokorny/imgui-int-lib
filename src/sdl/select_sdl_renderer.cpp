@@ -1,19 +1,24 @@
 #include "select_sdl_renderer.h"
-#include "SDL2/SDL.h"
-#include "gl/renderer.h"
-#include "sdl/system_integration.h"
-#include <iostream>
-#ifdef GL
-#include "imgui_impl_opengl3.h"
-#elif VULKAN
-#include "imgui_impl_vulkan.h"
-#endif
-#include "imgui_impl_sdl.h"
-//#include "imgui_impl_vulkan.h"
-//#include "vulkan/renderer.h"
 
+#include "imgui_impl_sdl.h"
+#include "sdl/system_integration.h"
+#ifdef GL
+#include "gl/renderer.h"
+#include "imgui_impl_opengl3.h"
+#elif defined(VULKAN)
+#include "vulkan/renderer.h"
+#include <SDL2/SDL_vulkan.h>
+#endif
+
+#include <SDL2/SDL.h>
+#include <iostream>
+
+#ifdef GL
 namespace ig = imgui::gl;
-// namespace iv = imgui::vulkan;
+#elif defined(VULKAN)
+namespace iv = imgui::vulkan;
+#endif
+
 namespace is = imgui::sdl;
 namespace
 {
@@ -53,12 +58,12 @@ std::pair<std::unique_ptr<imgui::SystemIntegration>, std::unique_ptr<imgui::Rend
                                                                                                             size_t initial_height,
                                                                                                             std::string const& wn)
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) throw std::runtime_error("error");
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) throw std::runtime_error("error");
+#ifdef GL
     auto version    = run_gl_init();
     auto try_window = SDL_CreateWindow(wn.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, initial_width, initial_height,
                                        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-#ifdef GL
     if (try_window)
     {
         auto context = SDL_GL_CreateContext(try_window);
@@ -66,25 +71,30 @@ std::pair<std::unique_ptr<imgui::SystemIntegration>, std::unique_ptr<imgui::Rend
         SDL_GL_SetSwapInterval(1);  // Enable vsync
 
         auto integration = std::make_unique<is::SystemIntegration>(try_window);
-        auto renderer = std::make_unique<ig::Renderer>(version.first, version.second);
+        auto renderer    = std::make_unique<ig::Renderer>(version.first, version.second);
         //[context]() { SDL_GL_DeleteContext(context); });
 
         return {std::move(integration), std::move(renderer)};
     }
 
-#elif VULKAN
-    // TODO this is the Vulkan case..
-    if (!try_window)
-    {
-        try_window = SDL_CreateWindow("window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, initial_width, initial_height,
-                                      SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
-    }
+#elif defined(VULKAN)
+    auto try_window = SDL_CreateWindow(wn.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, initial_width, initial_height,
+                                       SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     if (try_window)
     {
-        auto context     = SDL_VK_CreateContext(try_window);
+        int w, h;
+        SDL_GetWindowSize(try_window, &w, &h);
+
+        auto renderer = std::make_unique<iv::Renderer>(
+            [try_window](VkInstance instance)
+            {
+                VkSurfaceKHR ret;
+                SDL_Vulkan_CreateSurface(try_window, instance, &ret);
+                return ret;
+            },
+            w, h);
         auto integration = std::make_unique<is::SystemIntegration>(try_window);
-        ImGui_ImplSDL2_InitForVulkan(try_window);
-        auto renderer = std::make_unique<cuv::Renderer>([context]() { SDL_VK_DeleteContext(context); });
+        //ImGui_ImplSDL2_InitForVulkan(try_window);
         return {std::move(integration), std::move(renderer)};
     }
 #endif
