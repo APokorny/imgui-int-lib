@@ -5,14 +5,14 @@ endif()
 project(imgui-int VERSION 1.0.0 LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.10)
 
-include(FetchContent)
 include(ExternalProject)
-fetchcontent_declare(vk-bootstrap
-  GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap
+include(cmake/CPM.cmake)
+CPMAddPackage(NAME vk-bootstrap
+  GITHUB_REPOSITORY "charles-lunarg/vk-bootstrap"
   GIT_TAG master) # todo: pick a fixed revision
+CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.6.0")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
-
 
 if(EMSCRIPTEN)
   set(VULKAN_ENABLED OFF)
@@ -123,7 +123,7 @@ if(GL_FOUND AND SDL_FOUND)
     src/gl/renderer.cpp
     src/ui.cpp
     src/gl/renderer.h)
-  install(TARGETS imgui-sdl-gl EXPORT imgui-int-Targets)
+  install(TARGETS imgui-sdl-gl EXPORT imgui-intTargets)
   target_include_directories(imgui-sdl-gl PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
   target_link_libraries(imgui-sdl-gl PRIVATE PkgConfig::GL PkgConfig::SDL dl PUBLIC imgui-int)
@@ -131,7 +131,6 @@ if(GL_FOUND AND SDL_FOUND)
   add_library(Imgui::imgui-sdl-gl ALIAS imgui-sdl-gl)
 endif()
 if(VULKAN_FOUND AND SDL_FOUND)
-  FetchContent_MakeAvailable(vk-bootstrap)
   add_library(imgui-sdl-vulkan
     ext/imgui/backends/imgui_impl_vulkan.h
     ext/imgui/backends/imgui_impl_vulkan.cpp
@@ -144,7 +143,7 @@ if(VULKAN_FOUND AND SDL_FOUND)
     src/ui.cpp
     src/vulkan/renderer.cpp
     src/vulkan/renderer.h)
-  install(TARGETS imgui-sdl-vulkan EXPORT imgui-int-Targets)
+  install(TARGETS imgui-sdl-vulkan EXPORT imgui-intTargets)
   target_include_directories(imgui-sdl-vulkan PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
   target_link_libraries(imgui-sdl-vulkan PRIVATE PkgConfig::SDL PkgConfig::VULKAN vk-bootstrap::vk-bootstrap PUBLIC imgui-int)
@@ -164,29 +163,21 @@ elseif(TARGET imgui-win32-dx9)
   add_library(Imgui::imgui ALIAS imgui-win32-dx9)
 endif()
 
-option(BUILD_EXAMPLE ON)
-add_subdirectory(examples)
-
-install(TARGETS imgui-int EXPORT imgui-int-Targets
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-  )
-
-install(EXPORT imgui-int-Targets
-  FILE imgui-int-Targets.cmake
-  NAMESPACE Imgui::
-  DESTINATION lib/cmake/
-  )
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("imgui-int-ConfigVersion.cmake"
-  VERSION "${imgui-int_VERSION}"
-  COMPATIBILITY SameMajorVersion
-  )
-install(FILES
-  "imgui-int-Config.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/imgui-int-ConfigVersion.cmake"
-  DESTINATION lib/cmake/
+option(BUILD_EXAMPLE "Enable imgui examples" ON)
+if(BUILD_EXAMPLE)
+  add_subdirectory(examples)
+endif()
+install(TARGETS ImGui ImGui-cpp EXPORT imgui-intTargets)
+packageProject(
+  NAME ${PROJECT_NAME}
+  VERSION ${PROJECT_VERSION}
+  BINARY_DIR ${PROJECT_BINARY_DIR}
+  INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include;${PROJECT_SOURCE_DIR}/ext/imgui;${PROJECT_SOURCE_DIR}/ext/imgui-node-editor
+  INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
+  VERSION_HEADER "${PROJECT_NAME}/version.h"
+  EXPORT_HEADER "${PROJECT_NAME}/export.h"
+  NAMESPACE Imgui
+  COMPATIBILITY AnyNewerVersion
+  DISABLE_VERSION_SUFFIX YES
+  ARCH_INDEPENDENT YES
   )
