@@ -248,7 +248,7 @@ function intArrayToString(array) {
           meminitXHR.send(null);
 
           var script = document.createElement('script');
-          script.src = "battery-ui.js";
+          script.src = "@TARGET_NAME@.js";
           document.body.appendChild(script);
 
 </script>

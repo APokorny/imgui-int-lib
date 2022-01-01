@@ -66,20 +66,23 @@ target_include_directories(imgui-int
     $<INSTALL_INTERFACE:include/>
   )
 target_link_libraries(imgui-int PRIVATE ImGui ImGui-cpp)
-target_compile_features(imgui-int PRIVATE cxx_std_17)
+target_compile_features(imgui-int PUBLIC cxx_std_17)
 
 if(EMSCRIPTEN)
+  include(cmake/emscripten.cmake)
   add_library(imgui-emscripten
     ext/imgui/backends/imgui_impl_opengl3.h
     ext/imgui/backends/imgui_impl_opengl3.cpp
-    ext/imgui/backends/imgui_impl_sdl.h
-    ext/imgui/backends/imgui_impl_sdl.cpp
+    #ext/imgui/backends/imgui_impl_sdl.h
+    #ext/imgui/backends/imgui_impl_sdl.cpp
     src/gl/renderer.cpp
     src/gl/renderer.h
+    src/ui.cpp
     src/emscripten/system_integration.cpp
     src/emscripten/system_integration.h
     )
   target_link_libraries(imgui-emscripten PUBLIC GL imgui-int) # TODO GL finder does not support emscripten yet..
+  install(TARGETS imgui-emscripten EXPORT imgui-intTargets)
   target_include_directories(imgui-emscripten PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/emscripten>)
@@ -105,6 +108,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     src/dx9/renderer.cpp
     src/ui.cpp
     src/dx9/renderer.h)
+  install(TARGETS imgui-win32-dx9 EXPORT imgui-intTargets)
   target_link_libraries(imgui-win32-dx9 PRIVATE d3d9 dinput wsock32 PUBLIC imgui-int)
   target_include_directories(imgui-win32-dx9 PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
