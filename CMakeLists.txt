@@ -7,9 +7,7 @@ project(imgui-int VERSION 1.0.0 LANGUAGES CXX)
 
 include(ExternalProject)
 include(cmake/CPM.cmake)
-CPMAddPackage(NAME vk-bootstrap
-  GITHUB_REPOSITORY "charles-lunarg/vk-bootstrap"
-  GIT_TAG master) # todo: pick a fixed revision
+
 CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.6.0")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
@@ -68,20 +66,19 @@ target_include_directories(imgui-int
 target_link_libraries(imgui-int PRIVATE ImGui ImGui-cpp)
 target_compile_features(imgui-int PUBLIC cxx_std_17)
 
-if(EMSCRIPTEN)
+if(EMSCRIPTEN) # TODO add webgpu
   include(cmake/emscripten.cmake)
   add_library(imgui-emscripten
     ext/imgui/backends/imgui_impl_opengl3.h
     ext/imgui/backends/imgui_impl_opengl3.cpp
-    #ext/imgui/backends/imgui_impl_sdl.h
-    #ext/imgui/backends/imgui_impl_sdl.cpp
     src/gl/renderer.cpp
     src/gl/renderer.h
     src/ui.cpp
     src/emscripten/system_integration.cpp
     src/emscripten/system_integration.h
     )
-  target_link_libraries(imgui-emscripten PUBLIC GL imgui-int) # TODO GL finder does not support emscripten yet..
+  target_link_options(imgui-emscripten PUBLIC "SHELL:-s WASM=1" "SHELL:-s USE_WEBGL2=1" "SHELL:-s GL_ASSERTIONS=1" "SHELL:-s ASSERTIONS=1")
+  target_link_libraries(imgui-emscripten PUBLIC GL imgui-int)
   install(TARGETS imgui-emscripten EXPORT imgui-intTargets)
   target_include_directories(imgui-emscripten PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>
@@ -135,6 +132,9 @@ if(GL_FOUND AND SDL_FOUND)
   add_library(Imgui::imgui-sdl-gl ALIAS imgui-sdl-gl)
 endif()
 if(VULKAN_FOUND AND SDL_FOUND)
+  CPMAddPackage(NAME vk-bootstrap
+    GITHUB_REPOSITORY "charles-lunarg/vk-bootstrap"
+    GIT_TAG master) # todo: pick a fixed revision
   add_library(imgui-sdl-vulkan
     ext/imgui/backends/imgui_impl_vulkan.h
     ext/imgui/backends/imgui_impl_vulkan.cpp

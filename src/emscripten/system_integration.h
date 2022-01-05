@@ -10,7 +10,7 @@ struct SystemIntegration : imgui::SystemIntegration {
     int width, height;
     int mouse_status[8];
     std::function<void(Context*)> create_ui;
-    SystemIntegration(size_t width, size_t height);
+    SystemIntegration();
     ~SystemIntegration();
     void loop();
     void setup_imgui() override;

@@ -6,9 +6,10 @@
 #include "imgui.h"
 #include "imgui/context.h"
 
-namespace ie = imgui::emscripten;
+namespace ie                = imgui::emscripten;
 constexpr uint32_t UNMAPPED = 1024;
-enum HIDKeyCodes {
+enum HIDKeyCodes
+{
     Reserved,                      // 0x00
     Key_ErrorRollOver,             // 0x01
     Key_POSTFail,                  // 0x02
@@ -183,9 +184,10 @@ enum HIDKeyCodes {
     Keyboard_RightAlt,             // 0xE6
     Keyboard_Right_GUI             // 0xE7
 };
-struct KeyInfo {
+struct KeyInfo
+{
     uint32_t code;
-    bool printable{false};
+    bool     printable{false};
 };
 
 static KeyInfo const emscripten_scancode_table[] = {
@@ -414,45 +416,47 @@ static KeyInfo const emscripten_scancode_table[] = {
     /* 222 */ {Key_Apostrophe, false}, /*FX, D3E legacy*/
 };
 
-auto to_scancode(uint32_t key_code) {
-    if (key_code < sizeof(emscripten_scancode_table) / sizeof(uint32_t)) return emscripten_scancode_table[key_code];
+auto to_scancode(uint32_t key_code)
+{
+    if (key_code < sizeof(emscripten_scancode_table) / sizeof(const KeyInfo)) return emscripten_scancode_table[key_code];
     return KeyInfo{UNMAPPED, false};
 }
 
-ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_height) : create_ui{[](Context*) {}} {
-    emscripten_set_canvas_element_size("", initial_width, initial_height);
-    char const* target = "#window";
-    void* data = this;
+ie::SystemIntegration::SystemIntegration() : create_ui{[](Context*) {}}
+{
+    char const* target = "#canvas";
+    emscripten_get_screen_size(&width, &height);
+    emscripten_set_canvas_element_size(target, width, height);
+    void*     data        = this;
     pthread_t this_thread = EM_CALLBACK_THREAD_CONTEXT_CALLING_THREAD;
     emscripten_set_keydown_callback_on_thread(
-        "#document", data, 0,
-        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
-            ImGuiIO& io = ImGui::GetIO();
-            auto scan_code = to_scancode(event->keyCode);
-            if (scan_code.printable)
-                io.AddInputCharactersUTF8(event->key);
-            if (scan_code.code == UNMAPPED)
-                return EMSCRIPTEN_RESULT_FAILED;
+        target, data, 0,
+        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int
+        {
+            ImGuiIO& io        = ImGui::GetIO();
+            auto     scan_code = to_scancode(event->keyCode);
+            if (scan_code.printable) io.AddInputCharactersUTF8(event->key);
+            if (scan_code.code == UNMAPPED) return EMSCRIPTEN_RESULT_FAILED;
             io.KeysDown[scan_code.code & 511] = 1;
-            io.KeyCtrl = event->ctrlKey;
-            io.KeyShift = event->shiftKey;
-            io.KeyAlt = event->altKey;
-            io.KeySuper = event->metaKey;
+            io.KeyCtrl                        = event->ctrlKey;
+            io.KeyShift                       = event->shiftKey;
+            io.KeyAlt                         = event->altKey;
+            io.KeySuper                       = event->metaKey;
             return EMSCRIPTEN_RESULT_SUCCESS;
         },
         this_thread);
     emscripten_set_keyup_callback_on_thread(
-        "#document", data, 0,
-        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int {
-            ImGuiIO& io = ImGui::GetIO();
-            auto scan_code = to_scancode(event->keyCode);
-            if (scan_code.code == UNMAPPED)
-                return EMSCRIPTEN_RESULT_FAILED;
+        target, data, 0,
+        [](int type, EmscriptenKeyboardEvent const* event, void*) -> int
+        {
+            ImGuiIO& io        = ImGui::GetIO();
+            auto     scan_code = to_scancode(event->keyCode);
+            if (scan_code.code == UNMAPPED) return EMSCRIPTEN_RESULT_FAILED;
             io.KeysDown[scan_code.code & 511] = 0;
-            io.KeyCtrl = event->ctrlKey;
-            io.KeyShift = event->shiftKey;
-            io.KeyAlt = event->altKey;
-            io.KeySuper = event->metaKey;
+            io.KeyCtrl                        = event->ctrlKey;
+            io.KeyShift                       = event->shiftKey;
+            io.KeyAlt                         = event->altKey;
+            io.KeySuper                       = event->metaKey;
             return EMSCRIPTEN_RESULT_SUCCESS;
         },
         this_thread);
@@ -460,9 +464,10 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return false; }, this_thread);
     emscripten_set_mousedown_callback_on_thread(
         target, data, true,
-        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
-            ImGuiIO& io = ImGui::GetIO();
-            SystemIntegration* self = static_cast<SystemIntegration*>(obj);
+        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int
+        {
+            ImGuiIO&           io             = ImGui::GetIO();
+            SystemIntegration* self           = static_cast<SystemIntegration*>(obj);
             self->mouse_status[event->button] = 1;
             return false;
         },
@@ -470,9 +475,10 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
 
     emscripten_set_mouseup_callback_on_thread(
         target, data, true,
-        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int {
-            ImGuiIO& io = ImGui::GetIO();
-            SystemIntegration* self = static_cast<SystemIntegration*>(obj);
+        [](int type, EmscriptenMouseEvent const* event, void* obj) -> int
+        {
+            ImGuiIO&           io             = ImGui::GetIO();
+            SystemIntegration* self           = static_cast<SystemIntegration*>(obj);
             self->mouse_status[event->button] = 2;
 
             return false;
@@ -482,9 +488,10 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_mousemove_callback_on_thread(
         target, data, true,
-        [](int type, EmscriptenMouseEvent const* event, void*) -> int {
+        [](int type, EmscriptenMouseEvent const* event, void*) -> int
+        {
             ImGuiIO& io = ImGui::GetIO();
-            io.MousePos = ImVec2(static_cast<float>(event->canvasX), static_cast<float>(event->canvasY));
+            io.MousePos = ImVec2(static_cast<float>(event->targetX), static_cast<float>(event->targetY));
             return 0;
         },
         this_thread);
@@ -492,7 +499,8 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_mouseleave_callback_on_thread(
         target, data, true,
-        [](int type, EmscriptenMouseEvent const* event, void*) -> int {
+        [](int type, EmscriptenMouseEvent const* event, void*) -> int
+        {
             ImGuiIO& io = ImGui::GetIO();
             io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
             return 0;
@@ -504,7 +512,8 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         target, data, true, [](int type, EmscriptenMouseEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_wheel_callback_on_thread(
         target, data, true,
-        [](int type, EmscriptenWheelEvent const* event, void*) -> int {
+        [](int type, EmscriptenWheelEvent const* event, void*) -> int
+        {
             ImGuiIO& io = ImGui::GetIO();
             io.MouseWheel += event->deltaY;
             io.MouseWheelH += event->deltaX;
@@ -513,86 +522,74 @@ ie::SystemIntegration::SystemIntegration(size_t initial_width, size_t initial_he
         },
         this_thread);
     emscripten_set_resize_callback_on_thread(
-        target, data, true,
-        [](int type, EmscriptenUiEvent const* event, void* obj) -> int {
+        EMSCRIPTEN_EVENT_TARGET_WINDOW, data, true,
+        [](int type, EmscriptenUiEvent const* event, void* obj) -> int
+        {
             SystemIntegration* self = static_cast<SystemIntegration*>(obj);
-            self->width = event->windowInnerWidth;
-            self->height = event->windowInnerHeight;
+            self->width             = event->windowInnerWidth;
+            self->height            = event->windowInnerHeight;
+            emscripten_get_screen_size(&self->width, &self->height);
+            emscripten_set_canvas_element_size("#canvas", self->width, self->height);
             return 0;
         },
         this_thread);
     emscripten_set_scroll_callback_on_thread(
         target, data, true, [](int type, EmscriptenUiEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_blur_callback_on_thread(
-        target, data, true,
-        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-            return 0;
-        },
-        this_thread);
+        target, data, true, [](int type, EmscriptenFocusEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_focus_callback_on_thread(
-        target, data, true,
-        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-            return 0;
-        },
-        this_thread);
+        target, data, true, [](int type, EmscriptenFocusEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_focusin_callback_on_thread(
-        target, data, true,
-        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-            return 0;
-        },
-        this_thread);
+        target, data, true, [](int type, EmscriptenFocusEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_focusout_callback_on_thread(
-        target, data, true,
-        [](int type, EmscriptenFocusEvent const* event, void*) -> int {
-            return 0;
-        },
-        this_thread);
+        target, data, true, [](int type, EmscriptenFocusEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_deviceorientation_callback_on_thread(
         data, true, [](int type, EmscriptenDeviceOrientationEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_devicemotion_callback_on_thread(
         data, true, [](int type, EmscriptenDeviceMotionEvent const* event, void*) -> int { return 0; }, this_thread);
     emscripten_set_main_loop_arg(
-        [](void* arg) {
+        [](void* arg)
+        {
             auto self = static_cast<emscripten::SystemIntegration*>(arg);
             self->loop();
         },
         this, 0, 0);
 }
 
-void ie::SystemIntegration::setup_imgui() {
-    ImGuiIO& io = ImGui::GetIO();
-    io.KeyMap[ImGuiKey_Tab] = Key_Tab;
-    io.KeyMap[ImGuiKey_LeftArrow] = Key_LeftArrow;
+void ie::SystemIntegration::setup_imgui()
+{
+    ImGuiIO& io                    = ImGui::GetIO();
+    io.KeyMap[ImGuiKey_Tab]        = Key_Tab;
+    io.KeyMap[ImGuiKey_LeftArrow]  = Key_LeftArrow;
     io.KeyMap[ImGuiKey_RightArrow] = Key_RightArrow;
-    io.KeyMap[ImGuiKey_UpArrow] = Key_UpArrow;
-    io.KeyMap[ImGuiKey_DownArrow] = Key_DownArrow;
-    io.KeyMap[ImGuiKey_PageUp] = Key_PageUp;
-    io.KeyMap[ImGuiKey_PageDown] = Key_PageDown;
-    io.KeyMap[ImGuiKey_Home] = Key_Home;
-    io.KeyMap[ImGuiKey_End] = Key_End;
-    io.KeyMap[ImGuiKey_Insert] = Key_Insert;
-    io.KeyMap[ImGuiKey_Delete] = Key_Delete_Forward;
-    io.KeyMap[ImGuiKey_Backspace] = Key_Backspace;
-    io.KeyMap[ImGuiKey_Space] = Key_Spacebar;
-    io.KeyMap[ImGuiKey_Enter] = Key_Return;
-    io.KeyMap[ImGuiKey_Escape] = Key_ESCAPE;
-    io.KeyMap[ImGuiKey_A] = Key_A;
-    io.KeyMap[ImGuiKey_C] = Key_C;
-    io.KeyMap[ImGuiKey_V] = Key_V;
-    io.KeyMap[ImGuiKey_X] = Key_X;
-    io.KeyMap[ImGuiKey_Y] = Key_Y;
-    io.KeyMap[ImGuiKey_Z] = Key_Z;
+    io.KeyMap[ImGuiKey_UpArrow]    = Key_UpArrow;
+    io.KeyMap[ImGuiKey_DownArrow]  = Key_DownArrow;
+    io.KeyMap[ImGuiKey_PageUp]     = Key_PageUp;
+    io.KeyMap[ImGuiKey_PageDown]   = Key_PageDown;
+    io.KeyMap[ImGuiKey_Home]       = Key_Home;
+    io.KeyMap[ImGuiKey_End]        = Key_End;
+    io.KeyMap[ImGuiKey_Insert]     = Key_Insert;
+    io.KeyMap[ImGuiKey_Delete]     = Key_Delete_Forward;
+    io.KeyMap[ImGuiKey_Backspace]  = Key_Backspace;
+    io.KeyMap[ImGuiKey_Space]      = Key_Spacebar;
+    io.KeyMap[ImGuiKey_Enter]      = Key_Return;
+    io.KeyMap[ImGuiKey_Escape]     = Key_ESCAPE;
+    io.KeyMap[ImGuiKey_A]          = Key_A;
+    io.KeyMap[ImGuiKey_C]          = Key_C;
+    io.KeyMap[ImGuiKey_V]          = Key_V;
+    io.KeyMap[ImGuiKey_X]          = Key_X;
+    io.KeyMap[ImGuiKey_Y]          = Key_Y;
+    io.KeyMap[ImGuiKey_Z]          = Key_Z;
 }
 
-void ie::SystemIntegration::update_imgui_state() {
-    ImGuiIO& io = ImGui::GetIO();
+void ie::SystemIntegration::update_imgui_state()
+{
+    ImGuiIO& io  = ImGui::GetIO();
     io.DeltaTime = 1.0f / 30.0f;
 
-    emscripten_get_canvas_element_size("", &width, &height);
-    if (width * height == 0) {
-        return;
-    }
-    io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+    emscripten_get_canvas_element_size("#canvas", &width, &height);
+    if (width * height == 0) return;
+    io.DisplaySize             = ImVec2(static_cast<float>(width), static_cast<float>(height));
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
     // put up the new mouse state and input state
@@ -601,14 +598,17 @@ void ie::SystemIntegration::update_imgui_state() {
     io.MouseDown[2] = (mouse_status[2] != 0);
 }
 
-void ie::SystemIntegration::cleanup_imgui_state() {
+void ie::SystemIntegration::cleanup_imgui_state()
+{
     // put up the new mouse state and input state
     reset_mouse_state();
 }
 
-void ie::SystemIntegration::loop() {
+void ie::SystemIntegration::loop()
+{
     update_imgui_state();
-    if (renderer && context) {
+    if (renderer && context)
+    {
         ImGui::NewFrame();
         create_ui(context);
         ImGui::EndFrame();
@@ -625,7 +625,8 @@ void ie::SystemIntegration::loop() {
 bool ie::SystemIntegration::in_cooperative_environment() { return true; }
 void ie::SystemIntegration::execute_once() { loop(); }
 
-void ie::SystemIntegration::reset_mouse_state() {
+void ie::SystemIntegration::reset_mouse_state()
+{
     for (auto& status : mouse_status)
         if (status == 2) status = 0;
 }
@@ -634,7 +635,7 @@ void ie::SystemIntegration::set_renderer(Renderer* r) { renderer = r; }
 
 void ie::SystemIntegration::set_ui_call(std::function<void(Context*)>&& f) { create_ui = std::move(f); }
 
-void ie::SystemIntegration::set_context(imgui::Context* c) { context = c; }
+void                ie::SystemIntegration::set_context(imgui::Context* c) { context = c; }
 std::pair<int, int> ie::SystemIntegration::window_size() { return {width, height}; }
 
 ie::SystemIntegration::~SystemIntegration() = default;

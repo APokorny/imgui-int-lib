@@ -26,14 +26,14 @@ auto construct_gl_renderer() {
     attrs.majorVersion = 2;
     attrs.minorVersion = 0;
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context =
-        emscripten_webgl_create_context(0, &attrs);
+        emscripten_webgl_create_context("#canvas", &attrs);
     if (!context) {
         printf("Skipped: WebGL 2 is not supported.\n");
         return std::unique_ptr<imgui::gl::Renderer>(nullptr);
     }
     emscripten_webgl_make_context_current(context);
 
-    return std::make_unique<imgui::gl::Renderer>();
+    return std::make_unique<imgui::gl::Renderer>(300, "#version 300 es");
 }
 }  // namespace
 #endif
@@ -49,9 +49,7 @@ std::unique_ptr<imgui::Context> imgui::create_ui(
                                          std::move(style), std::move(fun));
 #elif defined(EMSCRIPTEN)
     return std::make_unique<imgui::Context>(
-        std::make_unique<emscripten::SystemIntegration>(
-            initial_width,
-                                                        initial_height),
+        std::make_unique<emscripten::SystemIntegration>(),
         construct_gl_renderer(), std::move(style), std::move(fun));
 #elif defined(SDL)
     {

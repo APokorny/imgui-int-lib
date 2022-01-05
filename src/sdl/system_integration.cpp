@@ -51,7 +51,7 @@ void is::SystemIntegration::loop()
         const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
         if (!is_minimized)
         {
-        renderer->pre_frame();
+            renderer->pre_frame();
             renderer->render_imgui_data(*draw_data);
             renderer->finish_frame();
 
