@@ -2,8 +2,7 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_vulkan.h>
 #include "imgui/context.h"
-#include "imgui/imgui.h"
-#include "imgui/renderer.h"
+#include <imgui.h>
 #include "imgui/renderer.h"
 #include "imgui_impl_sdl.h"
 

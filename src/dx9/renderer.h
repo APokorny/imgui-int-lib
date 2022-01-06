@@ -5,7 +5,7 @@
 #include <dinput.h>
 #include <string>
 #include "imgui/renderer.h"
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 struct ImDrawData;
 struct IDirect3DDevice9;

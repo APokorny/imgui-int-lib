@@ -1,5 +1,4 @@
 #include "renderer.h"
-#include "imgui/imgui.h"
 #include <iostream>
 
 namespace idx9 = imgui::dx9;

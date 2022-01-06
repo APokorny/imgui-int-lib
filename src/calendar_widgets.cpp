@@ -1,6 +1,6 @@
 #include "imgui/widgets.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <algorithm>
 
 // C++20 backport :(

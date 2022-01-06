@@ -4,7 +4,6 @@
 
 #include "system_integration.h"
 #include "imgui/context.h"
-#include "imgui/imgui.h"
 #include "imgui/renderer.h"
 
 #include <unordered_map>

@@ -1,6 +1,6 @@
 #pragma once
 #include "imgui/style.h"
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 namespace imgui {
 struct DefaultStyle : imgui::Style {

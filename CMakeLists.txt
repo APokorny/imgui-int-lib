@@ -53,17 +53,13 @@ target_include_directories(imgui-int PRIVATE )
 target_include_directories(imgui-int
   PRIVATE
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/res>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>
+    $<BUILD_INTERFACE:${ImGui_SOURCE_DIR}/ext/imgui/backends>
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui>
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/misc/cpp>
-    $<INSTALL_INTERFACE:include/imgui/misc/cpp>
     $<INSTALL_INTERFACE:include/>
   )
-target_link_libraries(imgui-int PRIVATE ImGui ImGui-cpp)
+target_link_libraries(imgui-int PUBLIC ImGui)
 target_compile_features(imgui-int PUBLIC cxx_std_17)
 
 if(EMSCRIPTEN) # TODO add webgpu
@@ -171,7 +167,6 @@ option(IMGUI_INT_LIB_BUILD_EXAMPLE "Enable imgui examples" ON)
 if(IMGUI_INT_LIB_BUILD_EXAMPLE)
   add_subdirectory(examples)
 endif()
-install(TARGETS ImGui ImGui-cpp EXPORT imgui-intTargets)
 packageProject(
   NAME ${PROJECT_NAME}
   VERSION ${PROJECT_VERSION}

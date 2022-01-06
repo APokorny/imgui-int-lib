@@ -1,7 +1,7 @@
 #pragma once
 #include "win32/windows_headers.h"
 #include "imgui/system_integration.h"
-#include "imgui/imgui.h"
+#include <imgui.h>
 #include "imgui/renderer.h"
 
 #include <functional>
