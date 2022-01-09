@@ -14,6 +14,33 @@ namespace imgui
 {
 namespace vulkan
 {
+struct Texture final : imgui::Texture
+{
+    VkImage        image{0};
+    VkImageView    image_view{0};
+    VkSampler      image_sampler{0};
+    VkDeviceMemory image_memory{0};
+    // TODO move this into an uploader..
+    VkCommandPool   command_pool;
+    VkCommandBuffer command_buffer;
+    VkQueue         upload_queue;
+    Texture(std::size_t width, std::size_t height, bool alpha, VkImage i, VkImageView iv, VkSampler is, VkDeviceMemory im,
+            VkCommandPool cp, VkCommandBuffer cb, VkQueue uq)
+        : imgui::Texture(width, height, alpha),
+          image(i),
+          image_view(iv),
+          image_sampler(is),
+          image_memory(im),
+          command_pool(cp),
+          command_buffer(cb),
+          upload_queue(uq)
+    {
+    }
+    operator ImTextureID() const override;
+    void     upload(unsigned char* buffer, std::size_t stride, std::size_t height, color_layout pixel_layout) override;
+    ~Texture();
+};
+
 struct Renderer : imgui::Renderer
 {
    public:
@@ -24,6 +51,8 @@ struct Renderer : imgui::Renderer
     void pre_frame() override;
     void finish_frame() override;
     void resize(size_t w, size_t h) override;
+
+    std::unique_ptr<imgui::Texture> create_texture(std::size_t width, std::size_t height, bool alpha) override;
     ~Renderer();
 
    private:

@@ -2,15 +2,15 @@
 #include <functional>
 #include <memory>
 
-namespace imgui {
+namespace imgui
+{
 struct SystemIntegration;
 struct Renderer;
 struct Style;
 
-struct Context {
-    Context(std::unique_ptr<SystemIntegration> integration,
-            std::unique_ptr<Renderer> renderer,
-            std::unique_ptr<Style> style,
+struct Context
+{
+    Context(std::unique_ptr<SystemIntegration> integration, std::unique_ptr<Renderer> renderer, std::unique_ptr<Style> style,
             std::function<void(Context*)>&& fun);
 
     ~Context();
@@ -31,10 +31,12 @@ struct Context {
      */
     std::pair<int, int> window_size();
 
+    Renderer* get_renderer() { return renderer.get(); }
+
    private:
     std::unique_ptr<SystemIntegration> system;
-    std::unique_ptr<Renderer> renderer;
-    std::unique_ptr<Style> style;
-    bool continue_to_run{true};
+    std::unique_ptr<Renderer>          renderer;
+    std::unique_ptr<Style>             style;
+    bool                               continue_to_run{true};
 };
 }  // namespace imgui

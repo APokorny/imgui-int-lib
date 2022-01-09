@@ -53,7 +53,6 @@ target_include_directories(imgui-int PRIVATE )
 target_include_directories(imgui-int
   PRIVATE
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/res>
-    $<BUILD_INTERFACE:${ImGui_SOURCE_DIR}/ext/imgui/backends>
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/>
@@ -65,8 +64,6 @@ target_compile_features(imgui-int PUBLIC cxx_std_17)
 if(EMSCRIPTEN) # TODO add webgpu
   include(cmake/emscripten.cmake)
   add_library(imgui-emscripten
-    ext/imgui/backends/imgui_impl_opengl3.h
-    ext/imgui/backends/imgui_impl_opengl3.cpp
     src/gl/renderer.cpp
     src/gl/renderer.h
     src/ui.cpp
@@ -74,26 +71,14 @@ if(EMSCRIPTEN) # TODO add webgpu
     src/emscripten/system_integration.h
     )
   target_link_options(imgui-emscripten PUBLIC "SHELL:-s WASM=1" "SHELL:-s USE_WEBGL2=1" "SHELL:-s GL_ASSERTIONS=1" "SHELL:-s ASSERTIONS=1")
-  target_link_libraries(imgui-emscripten PUBLIC GL imgui-int)
+  target_link_libraries(imgui-emscripten PUBLIC GL ImGui-gl3 imgui-int)
   install(TARGETS imgui-emscripten EXPORT imgui-intTargets)
   target_include_directories(imgui-emscripten PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/emscripten>)
   add_library(Imgui::imgui-emscripten ALIAS imgui-emscripten)
 endif()
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   add_library(imgui-win32-dx9
-    ext/imgui/backends/imgui_impl_dx9.h
-    ext/imgui/backends/imgui_impl_dx9.cpp
-    # make this runtime selectable?
-    #ext/imgui/backends/imgui_impl_dx10.h
-    #ext/imgui/backends/imgui_impl_dx10.cpp
-    #ext/imgui/backends/imgui_impl_dx11.h
-    #ext/imgui/backends/imgui_impl_dx11.cpp
-    #ext/imgui/backends/imgui_impl_dx12.h
-    #ext/imgui/backends/imgui_impl_dx12.cpp
-    ext/imgui/backends/imgui_impl_win32.h
-    ext/imgui/backends/imgui_impl_win32.cpp
     src/win32/select_win32_renderer.cpp
     src/win32/select_win32_renderer.h
     src/win32/system_integration.cpp
@@ -102,28 +87,20 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     src/ui.cpp
     src/dx9/renderer.h)
   install(TARGETS imgui-win32-dx9 EXPORT imgui-intTargets)
-  target_link_libraries(imgui-win32-dx9 PRIVATE d3d9 dinput wsock32 PUBLIC imgui-int)
-  target_include_directories(imgui-win32-dx9 PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
+  target_link_libraries(imgui-win32-dx9 PRIVATE d3d9 dinput wsock32 ImGui-dx9 PUBLIC imgui-int)
   add_library(Imgui::imgui-win32-dx9 ALIAS imgui-win32-dx9)
 endif()
 if(GL_FOUND AND SDL_FOUND)
   add_library(imgui-sdl-gl
-    ext/imgui/backends/imgui_impl_opengl3.h
-    ext/imgui/backends/imgui_impl_opengl3.cpp
     src/sdl/select_sdl_renderer.h
     src/sdl/select_sdl_renderer.cpp
-    ext/imgui/backends/imgui_impl_sdl.h
-    ext/imgui/backends/imgui_impl_sdl.cpp
     src/sdl/system_integration.cpp
     src/sdl/system_integration.h
     src/gl/renderer.cpp
     src/ui.cpp
     src/gl/renderer.h)
   install(TARGETS imgui-sdl-gl EXPORT imgui-intTargets)
-  target_include_directories(imgui-sdl-gl PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
-  target_link_libraries(imgui-sdl-gl PRIVATE PkgConfig::GL PkgConfig::SDL dl PUBLIC imgui-int)
+  target_link_libraries(imgui-sdl-gl PRIVATE ImGui-gl3 ImGui-sdl dl PUBLIC imgui-int)
   target_compile_definitions(imgui-sdl-gl PRIVATE GL SDL)
   add_library(Imgui::imgui-sdl-gl ALIAS imgui-sdl-gl)
 endif()
@@ -132,21 +109,15 @@ if(VULKAN_FOUND AND SDL_FOUND)
     GITHUB_REPOSITORY "charles-lunarg/vk-bootstrap"
     GIT_TAG master) # todo: pick a fixed revision
   add_library(imgui-sdl-vulkan
-    ext/imgui/backends/imgui_impl_vulkan.h
-    ext/imgui/backends/imgui_impl_vulkan.cpp
     src/sdl/select_sdl_renderer.h
     src/sdl/select_sdl_renderer.cpp
     src/sdl/system_integration.h
     src/sdl/system_integration.cpp
-    ext/imgui/backends/imgui_impl_sdl.h
-    ext/imgui/backends/imgui_impl_sdl.cpp
     src/ui.cpp
     src/vulkan/renderer.cpp
     src/vulkan/renderer.h)
   install(TARGETS imgui-sdl-vulkan EXPORT imgui-intTargets)
-  target_include_directories(imgui-sdl-vulkan PRIVATE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ext/imgui/backends>)
-  target_link_libraries(imgui-sdl-vulkan PRIVATE PkgConfig::SDL PkgConfig::VULKAN vk-bootstrap::vk-bootstrap PUBLIC imgui-int)
+  target_link_libraries(imgui-sdl-vulkan PRIVATE ImGui-vulkan vk-bootstrap::vk-bootstrap ImGui-sdl PUBLIC imgui-int)
   target_compile_definitions(imgui-sdl-vulkan PRIVATE VULKAN SDL)
   install(TARGETS vk-bootstrap vk-bootstrap-compiler-warnings vk-bootstrap-vulkan-headers EXPORT vk-bootstrap-targets)
   install(EXPORT vk-bootstrap-targets DESTINATION include)

@@ -1,10 +1,10 @@
 #include "select_sdl_renderer.h"
 
-#include "imgui_impl_sdl.h"
+#include <imgui_impl_sdl.h>
 #include "sdl/system_integration.h"
 #ifdef GL
 #include "gl/renderer.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui_impl_opengl3.h>
 #elif defined(VULKAN)
 #include "vulkan/renderer.h"
 #include <SDL2/SDL_vulkan.h>

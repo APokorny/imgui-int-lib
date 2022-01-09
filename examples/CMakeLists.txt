@@ -11,4 +11,4 @@ add_executable(imgui-interaction-example interaction-example.cpp)
 target_link_libraries(imgui-interaction-example Imgui::imgui imgui-node-editor)
 
 add_executable(imgui-blueprints-example blueprints-example.cpp)
-target_link_libraries(imgui-blueprints-example Imgui::imgui imgui-node-editor)
+target_link_libraries(imgui-blueprints-example Imgui::imgui imgui-node-editor stb-image)

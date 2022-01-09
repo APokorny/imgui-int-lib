@@ -4,10 +4,17 @@
 #include <imgui.h>
 #include <imgui/ui.h>
 #include <imgui/context.h>
+#include <imgui/renderer.h>
 #include <imgui/default_style.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
+extern "C"
+{
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
+#include "stb_image.h"
+}
 
 #include <string>
 #include <vector>
@@ -178,18 +185,15 @@ struct Editor
     std::map<ed::NodeId, float, NodeIdLess> node_touch_time;
     std::vector<Node>                       nodes;
     std::vector<Link>                       links;
+    imgui::Context*                         context{nullptr};
 
-    const int   m_PinIconSize      = 24;
-    ImTextureID m_HeaderBackground = nullptr;
-    ImTextureID m_SaveIcon         = nullptr;
-    ImTextureID m_RestoreIcon      = nullptr;
-    bool        m_ShowOrdinals     = false;
+    const int                       m_PinIconSize = 24;
+    std::unique_ptr<imgui::Texture> m_HeaderBackground;
+    std::unique_ptr<imgui::Texture> m_SaveIcon;
+    std::unique_ptr<imgui::Texture> m_RestoreIcon;
+    bool                            m_ShowOrdinals = false;
     ~Editor()
     {
-        /*releaseTexture(m_RestoreIcon);
-        releaseTexture(m_SaveIcon);
-        releaseTexture(m_HeaderBackground);*/
-
         if (editor)
         {
             ed::DestroyEditor(editor);
@@ -279,24 +283,39 @@ struct Editor
         links.push_back(Link(get_next_link_id(), nodes[14].Outputs[0].ID, nodes[15].Inputs[0].ID));
     }
 
+    std::unique_ptr<imgui::Texture> load_texture(char const* path)
+    {
+        int width     = 0;
+        int height    = 0;
+        int component = 0;
+        if (auto data = stbi_load(path, &width, &height, &component, 4))
+        {
+            auto texture = context->get_renderer()->create_texture(width, height, true);
+            texture->upload(data, width, height, imgui::none);
+            stbi_image_free(data);
+            return texture;
+        }
+        return nullptr;
+    }
+
     ImTextureID get_header_background()
     {
-        if (m_HeaderBackground) return m_HeaderBackground;
-        // m_HeaderBackground = LoadTexture("data/BlueprintBackground.png");
-        return m_HeaderBackground;
+        if (m_HeaderBackground) return *m_HeaderBackground;
+        m_HeaderBackground = load_texture("data/BlueprintBackground.png");
+        return *m_HeaderBackground;
     }
 
     ImTextureID get_restore_icon()
     {
-        if (m_RestoreIcon) return m_RestoreIcon;
-        // m_RestoreIcon = LoadTexture("data/ic_restore_white_24dp.png");
-        return m_RestoreIcon;
+        if (m_RestoreIcon) return *m_RestoreIcon;
+        m_RestoreIcon = load_texture("data/ic_restore_white_24dp.png");
+        return *m_RestoreIcon;
     }
     ImTextureID get_save_icon()
     {
-        if (m_SaveIcon) return m_SaveIcon;
-        // m_SaveIcon = LoadTexture("data/ic_save_white_24dp.png");
-        return m_SaveIcon;
+        if (m_SaveIcon) return *m_SaveIcon;
+        m_SaveIcon = load_texture("data/ic_save_white_24dp.png");
+        return *m_SaveIcon;
     }
 
     Node* spawn_input_action_node()
@@ -529,6 +548,7 @@ struct Editor
 
     void operator()(imgui::Context* ctx)
     {
+        context = ctx;
         // void DrawItemRect(ImColor color, float expand = 0.0f)
         //{
         //     ImGui::GetWindowDrawList()->AddRect(
@@ -1572,10 +1592,12 @@ struct Editor
         selectedNodes.resize(nodeCount);
         selectedLinks.resize(linkCount);
 
-        int saveIconWidth     = 64;  // GetTextureWidth(get_save_icon());
-        int saveIconHeight    = 64;  // GetTextureWidth(get_save_icon());
-        int restoreIconWidth  = 64;  // GetTextureWidth(m_RestoreIcon);
-        int restoreIconHeight = 64;  // GetTextureWidth(m_RestoreIcon);
+        get_save_icon();
+        get_restore_icon();
+        int saveIconWidth     = m_SaveIcon->width;
+        int saveIconHeight    = m_SaveIcon->height;
+        int restoreIconWidth  = m_RestoreIcon->width;
+        int restoreIconHeight = m_RestoreIcon->height;
 
         ImGui::GetWindowDrawList()->AddRectFilled(
             ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2(paneWidth, ImGui::GetTextLineHeight()),

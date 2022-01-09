@@ -8,6 +8,14 @@ namespace imgui
 {
 namespace gl
 {
+struct Texture : imgui::Texture
+{
+    unsigned int tex{0};
+
+    Texture(std::size_t width, std::size_t height, bool alpha, unsigned int tex) : imgui::Texture(width, height, alpha), tex(tex) {}
+    operator ImTextureID() const override;
+    void     upload(unsigned char* buffer, std::size_t stride, std::size_t height, color_layout pixel_layout) override;
+};
 struct Renderer : imgui::Renderer
 {
    public:
@@ -20,6 +28,8 @@ struct Renderer : imgui::Renderer
     void pre_frame() override;
     void finish_frame() override;
     void resize(size_t w, size_t h) override;
+
+    std::unique_ptr<imgui::Texture> create_texture(std::size_t w, std::size_t h, bool alpha) override;
     ~Renderer();
 };
 
