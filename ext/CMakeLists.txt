@@ -1,7 +1,7 @@
 CPMAddPackage(
   NAME ImGui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
-  GIT_TAG 100ede57643f39306760440487c527c9032266c8
+  GIT_TAG 704ab1114aa54858b690711554cf3312fbbcc3fc
   DOWNLOAD_ONLY YES
   PATCH_COMMAND patch -p1 -d <SOURCE_DIR>/ < ${imgui-int_SOURCE_DIR}/patches/0001-Add-layout-support-to-imgui.patch
 )
