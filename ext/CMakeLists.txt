@@ -56,7 +56,7 @@ if (ImGui_ADDED)
     target_link_libraries(ImGui-vulkan PUBLIC PkgConfig::VULKAN)
     pack_library(ImGui-vulkan /backends/)
   endif()
-  if(GL3_ENABLED)
+  if(GL3_ENABLED OR EMSCRIPTEN_ENABLED)
     add_library(ImGui-gl3
       ${ImGui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
       ${ImGui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
@@ -65,7 +65,9 @@ if (ImGui_ADDED)
       $<BUILD_INTERFACE:${ImGui_SOURCE_DIR}/>
       $<BUILD_INTERFACE:${ImGui_SOURCE_DIR}/backends>
       )
-    target_link_libraries(ImGui-gl3 PUBLIC PkgConfig::GL)
+    if(GL3_ENABLED)
+      target_link_libraries(ImGui-gl3 PUBLIC PkgConfig::GL)
+    endif()
     pack_library(ImGui-gl3 /backends/)
   endif()
   if(GL2_ENABLED)
