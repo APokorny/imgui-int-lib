@@ -1,7 +1,7 @@
 CPMAddPackage(
   NAME ImGui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
-  GIT_TAG 704ab1114aa54858b690711554cf3312fbbcc3fc
+  GIT_TAG c2694ef75e2b626ebf52493f4a1282d500d33bbb
   DOWNLOAD_ONLY YES
   PATCH_COMMAND patch -p1 -d <SOURCE_DIR>/ < ${imgui-int_SOURCE_DIR}/patches/0001-Add-layout-support-to-imgui.patch
 )
@@ -146,7 +146,7 @@ endif()
 CPMAddPackage(
   NAME imgui-node-editor
   GIT_REPOSITORY https://github.com/thedmd/imgui-node-editor.git
-  GIT_TAG d79ebdeb2375fa6c1f88a40e52e7d08c8d472b62
+  GIT_TAG 2f99b2d613a400f6579762bd7e7c343a0d844158
   DOWNLOAD_ONLY YES
 )
 if(imgui-node-editor_ADDED)

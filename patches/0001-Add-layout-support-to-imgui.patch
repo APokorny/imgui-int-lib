@@ -1,5 +1,5 @@
 diff --git a/imgui.cpp b/imgui.cpp
-index 564021b0..179f2152 100644
+index d5486d64..a36beb6e 100644
 --- a/imgui.cpp
 +++ b/imgui.cpp
 @@ -73,6 +73,7 @@ CODE
@@ -10,7 +10,7 @@ index 564021b0..179f2152 100644
  // [SECTION] SCROLLING
  // [SECTION] TOOLTIPS
  // [SECTION] POPUPS
-@@ -946,6 +947,27 @@ static void             NavRestoreLayer(ImGuiNavLayer layer);
+@@ -1004,6 +1005,27 @@ static void             NavRestoreLayer(ImGuiNavLayer layer);
  static void             NavRestoreHighlightAfterMove();
  static int              FindWindowFocusIndex(ImGuiWindow* window);
  
@@ -38,15 +38,15 @@ index 564021b0..179f2152 100644
  // Error Checking and Debug Tools
  static void             ErrorCheckNewFrameSanityChecks();
  static void             ErrorCheckEndFrameSanityChecks();
-@@ -1042,6 +1064,7 @@ ImGuiStyle::ImGuiStyle()
+@@ -1101,6 +1123,7 @@ ImGuiStyle::ImGuiStyle()
      ScrollbarRounding       = 9.0f;             // Radius of grab corners rounding for scrollbar
-     GrabMinSize             = 10.0f;            // Minimum width/height of a grab box for slider/scrollbar
+     GrabMinSize             = 12.0f;            // Minimum width/height of a grab box for slider/scrollbar
      GrabRounding            = 0.0f;             // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
 +    LayoutAlign             = 0.5f;             // Element alignment inside horizontal and vertical layouts (0.0f - left/top, 1.0f - right/bottom, 0.5f - center).
      LogSliderDeadzone       = 4.0f;             // The size in pixels of the dead-zone around zero on logarithmic sliders that cross zero.
      TabRounding             = 4.0f;             // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
      TabBorderSize           = 0.0f;             // Thickness of border around tabs.
-@@ -2673,6 +2696,7 @@ static const ImGuiStyleVarInfo GStyleVarInfo[] =
+@@ -2993,6 +3016,7 @@ static const ImGuiStyleVarInfo GStyleVarInfo[] =
      { ImGuiDataType_Float, 1, (ImU32)IM_OFFSETOF(ImGuiStyle, TabRounding) },         // ImGuiStyleVar_TabRounding
      { ImGuiDataType_Float, 2, (ImU32)IM_OFFSETOF(ImGuiStyle, ButtonTextAlign) },     // ImGuiStyleVar_ButtonTextAlign
      { ImGuiDataType_Float, 2, (ImU32)IM_OFFSETOF(ImGuiStyle, SelectableTextAlign) }, // ImGuiStyleVar_SelectableTextAlign
@@ -54,7 +54,7 @@ index 564021b0..179f2152 100644
  };
  
  static const ImGuiStyleVarInfo* GetStyleVarInfo(ImGuiStyleVar idx)
-@@ -3069,6 +3093,12 @@ ImGuiWindow::~ImGuiWindow()
+@@ -3420,6 +3444,12 @@ ImGuiWindow::~ImGuiWindow()
      IM_ASSERT(DrawList == &DrawListInst);
      IM_DELETE(Name);
      ColumnsStorage.clear_destruct();
@@ -67,21 +67,7 @@ index 564021b0..179f2152 100644
  }
  
  ImGuiID ImGuiWindow::GetID(const char* str, const char* str_end)
-@@ -6302,6 +6332,13 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
-         // This is useful to allow creating context menus on title bar only, etc.
-         SetLastItemData(window->MoveId, g.CurrentItemFlags, IsMouseHoveringRect(title_bar_rect.Min, title_bar_rect.Max, false) ? ImGuiItemStatusFlags_HoveredRect : 0, title_bar_rect);
- 
-+        // Mark all layouts as dead. They may be revived in this frame.
-+        for (int i = 0; i < window->DC.Layouts.Data.Size; i++)
-+        {
-+            ImGuiLayout* layout = (ImGuiLayout*)window->DC.Layouts.Data[i].val_p;
-+            layout->Live = false;
-+        }
-+
- #ifdef IMGUI_ENABLE_TEST_ENGINE
-         if (!(window->Flags & ImGuiWindowFlags_NoTitleBar))
-             IMGUI_TEST_ENGINE_ITEM_ADD(g.LastItemData.Rect, g.LastItemData.ID);
-@@ -7742,31 +7779,54 @@ void ImGui::ItemSize(const ImVec2& size, float text_baseline_y)
+@@ -8598,34 +8628,53 @@ void ImGui::ItemSize(const ImVec2& size, float text_baseline_y)
      ImGuiWindow* window = g.CurrentWindow;
      if (window->SkipItems)
          return;
@@ -116,31 +102,6 @@ index 564021b0..179f2152 100644
 +    else
 +    {
 +      const float line_width = ImMax(window->DC.CurrLineSize.x, size.x);
- 
--    // We increase the height in this function to accommodate for baseline offset.
--    // In theory we should be offsetting the starting position (window->DC.CursorPos), that will be the topic of a larger refactor,
--    // but since ItemSize() is not yet an API that moves the cursor (to handle e.g. wrapping) enlarging the height has the same effect.
--    const float offset_to_match_baseline_y = (text_baseline_y >= 0) ? ImMax(0.0f, window->DC.CurrLineTextBaseOffset - text_baseline_y) : 0.0f;
--    const float line_height = ImMax(window->DC.CurrLineSize.y, size.y + offset_to_match_baseline_y);
--
--    // Always align ourselves on pixel boundaries
--    //if (g.IO.KeyAlt) window->DrawList->AddRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(size.x, line_height), IM_COL32(255,0,0,200)); // [DEBUG]
--    window->DC.CursorPosPrevLine.x = window->DC.CursorPos.x + size.x;
--    window->DC.CursorPosPrevLine.y = window->DC.CursorPos.y;
--    window->DC.CursorPos.x = IM_FLOOR(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);    // Next line
--    window->DC.CursorPos.y = IM_FLOOR(window->DC.CursorPos.y + line_height + g.Style.ItemSpacing.y);        // Next line
--    window->DC.CursorMaxPos.x = ImMax(window->DC.CursorMaxPos.x, window->DC.CursorPosPrevLine.x);
--    window->DC.CursorMaxPos.y = ImMax(window->DC.CursorMaxPos.y, window->DC.CursorPos.y - g.Style.ItemSpacing.y);
--    //if (g.IO.KeyAlt) window->DrawList->AddCircle(window->DC.CursorMaxPos, 3.0f, IM_COL32(255,0,0,255), 4); // [DEBUG]
--
--    window->DC.PrevLineSize.y = line_height;
--    window->DC.CurrLineSize.y = 0.0f;
--    window->DC.PrevLineTextBaseOffset = ImMax(window->DC.CurrLineTextBaseOffset, text_baseline_y);
--    window->DC.CurrLineTextBaseOffset = 0.0f;
--
--    // Horizontal layout mode
--    if (window->DC.LayoutType == ImGuiLayoutType_Horizontal)
--        SameLine();
 +      // Always align ourselves on pixel boundaries
 +      //if (g.IO.KeyAlt) window->DrawList->AddRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(size.x, line_height), IM_COL32(255,0,0,200)); // [DEBUG]
 +      window->DC.CursorPosPrevLine.x = window->DC.CursorPos.x;
@@ -150,7 +111,34 @@ index 564021b0..179f2152 100644
 +      window->DC.CursorMaxPos.x = ImMax(window->DC.CursorMaxPos.x, window->DC.CursorPos.x - g.Style.ItemSpacing.x);
 +      window->DC.CursorMaxPos.y = ImMax(window->DC.CursorMaxPos.y, window->DC.CursorPosPrevLine.y);
 +      //if (g.IO.KeyAlt) window->DrawList->AddCircle(window->DC.CursorMaxPos, 3.0f, IM_COL32(255,0,0,255), 4); // [DEBUG]
-+
+ 
+-    // We increase the height in this function to accommodate for baseline offset.
+-    // In theory we should be offsetting the starting position (window->DC.CursorPos), that will be the topic of a larger refactor,
+-    // but since ItemSize() is not yet an API that moves the cursor (to handle e.g. wrapping) enlarging the height has the same effect.
+-    const float offset_to_match_baseline_y = (text_baseline_y >= 0) ? ImMax(0.0f, window->DC.CurrLineTextBaseOffset - text_baseline_y) : 0.0f;
+-
+-    const float line_y1 = window->DC.IsSameLine ? window->DC.CursorPosPrevLine.y : window->DC.CursorPos.y;
+-    const float line_height = ImMax(window->DC.CurrLineSize.y, /*ImMax(*/window->DC.CursorPos.y - line_y1/*, 0.0f)*/ + size.y + offset_to_match_baseline_y);
+-
+-    // Always align ourselves on pixel boundaries
+-    //if (g.IO.KeyAlt) window->DrawList->AddRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(size.x, line_height), IM_COL32(255,0,0,200)); // [DEBUG]
+-    window->DC.CursorPosPrevLine.x = window->DC.CursorPos.x + size.x;
+-    window->DC.CursorPosPrevLine.y = line_y1;
+-    window->DC.CursorPos.x = IM_FLOOR(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);    // Next line
+-    window->DC.CursorPos.y = IM_FLOOR(line_y1 + line_height + g.Style.ItemSpacing.y);                    // Next line
+-    window->DC.CursorMaxPos.x = ImMax(window->DC.CursorMaxPos.x, window->DC.CursorPosPrevLine.x);
+-    window->DC.CursorMaxPos.y = ImMax(window->DC.CursorMaxPos.y, window->DC.CursorPos.y - g.Style.ItemSpacing.y);
+-    //if (g.IO.KeyAlt) window->DrawList->AddCircle(window->DC.CursorMaxPos, 3.0f, IM_COL32(255,0,0,255), 4); // [DEBUG]
+-
+-    window->DC.PrevLineSize.y = line_height;
+-    window->DC.CurrLineSize.y = 0.0f;
+-    window->DC.PrevLineTextBaseOffset = ImMax(window->DC.CurrLineTextBaseOffset, text_baseline_y);
+-    window->DC.CurrLineTextBaseOffset = 0.0f;
+-    window->DC.IsSameLine = window->DC.IsSetPos = false;
+-
+-    // Horizontal layout mode
+-    if (window->DC.LayoutType == ImGuiLayoutType_Horizontal)
+-        SameLine();
 +      window->DC.PrevLineSize.x = line_width;
 +      window->DC.PrevLineSize.y = 0.0f;
 +      window->DC.CurrLineSize.x = 0.0f;
@@ -159,18 +147,25 @@ index 564021b0..179f2152 100644
 +    }
  }
  
- void ImGui::ItemSize(const ImRect& bb, float text_baseline_y)
-@@ -7824,6 +7884,9 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg, ImGu
+ // Declare item bounding box for clipping and interaction.
+@@ -8674,6 +8723,16 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg, ImGu
      }
      g.NextItemData.Flags = ImGuiNextItemDataFlags_None;
  
 +    if (window->DC.CurrentLayoutItem)
 +        window->DC.CurrentLayoutItem->MeasuredBounds.Max = ImMax(window->DC.CurrentLayoutItem->MeasuredBounds.Max, bb.Max);
 +
++        // Mark all layouts as dead. They may be revived in this frame.
++        for (int i = 0; i < window->DC.Layouts.Data.Size; i++)
++        {
++            ImGuiLayout* layout = (ImGuiLayout*)window->DC.Layouts.Data[i].val_p;
++            layout->Live = false;
++        }
++
  #ifdef IMGUI_ENABLE_TEST_ENGINE
      if (id != 0)
          IMGUI_TEST_ENGINE_ITEM_ADD(nav_bb_arg ? *nav_bb_arg : bb, id);
-@@ -8187,6 +8250,695 @@ void ImGui::EndGroup()
+@@ -9060,6 +9119,695 @@ void ImGui::EndGroup()
      //window->DrawList->AddRect(group_bb.Min, group_bb.Max, IM_COL32(255,0,255,255));   // [Debug]
  }
  
@@ -867,10 +862,10 @@ index 564021b0..179f2152 100644
  //-----------------------------------------------------------------------------
  // [SECTION] SCROLLING
 diff --git a/imgui.h b/imgui.h
-index 16e000d9..d4580cc0 100644
+index 5ae2158c..92cc6a0f 100644
 --- a/imgui.h
 +++ b/imgui.h
-@@ -463,6 +463,19 @@ namespace ImGui
+@@ -456,6 +456,19 @@ namespace ImGui
      IMGUI_API float         GetFrameHeight();                                               // ~ FontSize + style.FramePadding.y * 2
      IMGUI_API float         GetFrameHeightWithSpacing();                                    // ~ FontSize + style.FramePadding.y * 2 + style.ItemSpacing.y (distance in pixels between 2 consecutive lines of framed widgets)
  
@@ -890,7 +885,7 @@ index 16e000d9..d4580cc0 100644
      // ID stack/scopes
      // Read the FAQ (docs/FAQ.md or http://dearimgui.org/faq) for more details about how ID are handled in dear imgui.
      // - Those questions are answered and impacted by understanding of the ID stack system:
-@@ -1541,6 +1554,7 @@ enum ImGuiStyleVar_
+@@ -1607,6 +1620,7 @@ enum ImGuiStyleVar_
      ImGuiStyleVar_TabRounding,         // float     TabRounding
      ImGuiStyleVar_ButtonTextAlign,     // ImVec2    ButtonTextAlign
      ImGuiStyleVar_SelectableTextAlign, // ImVec2    SelectableTextAlign
@@ -898,7 +893,7 @@ index 16e000d9..d4580cc0 100644
      ImGuiStyleVar_COUNT
  };
  
-@@ -1786,6 +1800,7 @@ struct ImGuiStyle
+@@ -1854,6 +1868,7 @@ struct ImGuiStyle
      float       ScrollbarRounding;          // Radius of grab corners for scrollbar.
      float       GrabMinSize;                // Minimum width/height of a grab box for slider/scrollbar.
      float       GrabRounding;               // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
@@ -907,10 +902,10 @@ index 16e000d9..d4580cc0 100644
      float       TabRounding;                // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
      float       TabBorderSize;              // Thickness of border around tabs.
 diff --git a/imgui_demo.cpp b/imgui_demo.cpp
-index 1f9b0bc9..32562b2e 100644
+index a323e8e8..6e44391e 100644
 --- a/imgui_demo.cpp
 +++ b/imgui_demo.cpp
-@@ -3250,6 +3250,139 @@ static void ShowDemoWindowLayout()
+@@ -3298,6 +3298,139 @@ static void ShowDemoWindowLayout()
  
          ImGui::TreePop();
      }
@@ -1051,18 +1046,18 @@ index 1f9b0bc9..32562b2e 100644
  
  static void ShowDemoWindowPopups()
 diff --git a/imgui_internal.h b/imgui_internal.h
-index 572a77b4..7622c7c7 100644
+index 9fd0ede2..7e1a71b2 100644
 --- a/imgui_internal.h
 +++ b/imgui_internal.h
-@@ -144,6 +144,7 @@ struct ImGuiWindowSettings;         // Storage for a window .ini settings (we ke
+@@ -146,6 +146,7 @@ struct ImGuiWindowSettings;         // Storage for a window .ini settings (we ke
  
  // Use your programming IDE "Go to definition" facility on the names of the center columns to find the actual flags/enum lists.
  typedef int ImGuiLayoutType;            // -> enum ImGuiLayoutType_         // Enum: Horizontal or vertical
 +typedef int ImGuiLayoutItemType;        // -> enum ImGuiLayoutItemType_    // Enum: Item or Spring
  typedef int ImGuiActivateFlags;         // -> enum ImGuiActivateFlags_      // Flags: for navigation/focus function (will be for ActivateItem() later)
- typedef int ImGuiItemFlags;             // -> enum ImGuiItemFlags_          // Flags: for PushItemFlag()
- typedef int ImGuiItemStatusFlags;       // -> enum ImGuiItemStatusFlags_    // Flags: for DC.LastItemStatusFlags
-@@ -874,6 +875,12 @@ enum ImGuiLayoutType_
+ typedef int ImGuiDebugLogFlags;         // -> enum ImGuiDebugLogFlags_      // Flags: for ShowDebugLogWindow(), g.DebugLogFlags
+ typedef int ImGuiInputFlags;            // -> enum ImGuiInputFlags_         // Flags: for IsKeyPressedEx()
+@@ -917,6 +918,12 @@ enum ImGuiLayoutType_
      ImGuiLayoutType_Vertical = 1
  };
  
@@ -1075,7 +1070,7 @@ index 572a77b4..7622c7c7 100644
  enum ImGuiLogType
  {
      ImGuiLogType_None = 0,
-@@ -1285,6 +1292,73 @@ struct ImGuiNavItemData
+@@ -1388,6 +1395,73 @@ struct ImGuiNavItemData
      void Clear()        { Window = NULL; ID = FocusScopeId = 0; InFlags = 0; DistBox = DistCenter = DistAxial = FLT_MAX; }
  };
  
@@ -1149,7 +1144,7 @@ index 572a77b4..7622c7c7 100644
  //-----------------------------------------------------------------------------
  // [SECTION] Columns support
  //-----------------------------------------------------------------------------
-@@ -1942,6 +2016,12 @@ struct IMGUI_API ImGuiWindowTempData
+@@ -2084,6 +2158,12 @@ struct IMGUI_API ImGuiWindowTempData
      int                     CurrentTableIdx;        // Current table index (into g.Tables)
      ImGuiLayoutType         LayoutType;
      ImGuiLayoutType         ParentLayoutType;       // Layout type of parent window at the time of Begin()
