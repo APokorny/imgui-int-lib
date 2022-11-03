@@ -21,7 +21,7 @@ void ig::Renderer::acquire_cached_resources()
 
 void ig::Renderer::setup_imgui() { ImGui_ImplOpenGL3_Init(glsl_version.c_str()); }
 void ig::Renderer::finish_frame() {}
-void ig::Renderer::pre_frame() {}
+void ig::Renderer::pre_frame() {glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);}
 void ig::Renderer::resize(size_t, size_t)
 { /**/
 }

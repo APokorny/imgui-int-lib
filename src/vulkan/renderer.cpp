@@ -293,13 +293,12 @@ void ig::Renderer::finish_frame()
 }
 void ig::Renderer::pre_frame()
 {
-#if 0
-    main_window_data.ClearValue.color.float32[0] = clear_color.x * clear_color.w;
-    main_window_data.ClearValue.color.float32[1] = clear_color.y * clear_color.w;
-    main_window_data.ClearValue.color.float32[2] = clear_color.z * clear_color.w;
-    main_window_data.ClearValue.color.float32[3] = clear_color.w;
-#endif
+    main_window_data.ClearValue.color.float32[0] = 0;//clear_color.x * clear_color.w;
+    main_window_data.ClearValue.color.float32[1] = 0;//clear_color.y * clear_color.w;
+    main_window_data.ClearValue.color.float32[2] = 0;//clear_color.z * clear_color.w;
+    main_window_data.ClearValue.color.float32[3] = 1.0;//clear_color.w;
 }
+
 void ig::Renderer::resize(size_t width, size_t height)
 {
     ImGui_ImplVulkan_SetMinImageCount(MinImageCount);
