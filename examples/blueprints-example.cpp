@@ -1224,6 +1224,16 @@ struct Editor
 
                 if (ed::BeginDelete())
                 {
+                    ed::NodeId nodeId = 0;
+                    while (ed::QueryDeletedNode(&nodeId))
+                    {
+                        if (ed::AcceptDeletedItem())
+                        {
+                            auto id = std::find_if(nodes.begin(), nodes.end(), [nodeId](auto& node) { return node.ID == nodeId; });
+                            if (id != nodes.end()) nodes.erase(id);
+                        }
+                    }
+
                     ed::LinkId linkId = 0;
                     while (ed::QueryDeletedLink(&linkId))
                     {
@@ -1234,15 +1244,6 @@ struct Editor
                         }
                     }
 
-                    ed::NodeId nodeId = 0;
-                    while (ed::QueryDeletedNode(&nodeId))
-                    {
-                        if (ed::AcceptDeletedItem())
-                        {
-                            auto id = std::find_if(nodes.begin(), nodes.end(), [nodeId](auto& node) { return node.ID == nodeId; });
-                            if (id != nodes.end()) nodes.erase(id);
-                        }
-                    }
                 }
                 ed::EndDelete();
             }
