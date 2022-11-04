@@ -1540,7 +1540,7 @@ struct Editor
         ImGui::EndHorizontal();
 
         static ImGuiTextFilter filter;
-        filter.Draw("", paneWidth);
+        filter.Draw("#Filter", paneWidth);
 
         ImGui::Spacing();
 
