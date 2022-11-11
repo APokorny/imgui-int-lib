@@ -8,7 +8,7 @@ project(imgui-int VERSION 1.0.0 LANGUAGES CXX)
 include(ExternalProject)
 include(cmake/CPM.cmake)
 
-CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.6.0")
+CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.9.0")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 
