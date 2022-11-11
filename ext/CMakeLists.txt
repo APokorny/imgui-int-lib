@@ -179,7 +179,7 @@ if(imgui-node-editor_ADDED)
       ${imgui-node-editor_SOURCE_DIR}/imgui_node_editor.cpp
       ${imgui-node-editor_SOURCE_DIR}/imgui_node_editor_api.cpp
       )
-  target_link_libraries(imgui-node-editor PUBLIC ImGui)
+  target_link_libraries(imgui-node-editor PUBLIC ImGui stb-image)
   target_include_directories(imgui-node-editor PUBLIC
           $<BUILD_INTERFACE:${imgui-node-editor_SOURCE_DIR}/>)
   packageProject(
