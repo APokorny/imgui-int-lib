@@ -31,9 +31,15 @@ void is::SystemIntegration::loop()
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
         if (event.type == SDL_QUIT) context->stop();
-        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
-            event.window.windowID == SDL_GetWindowID(window))
-            context->stop();
+        if (event.type == SDL_WINDOWEVENT)
+        {
+            if (event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+                context->stop();
+            else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                width = event.window.data1;
+                height = event.window.data2;
+            }
+        }
     }
     update_imgui_state();
     ImGui_ImplSDL2_NewFrame();
