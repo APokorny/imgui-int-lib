@@ -38,6 +38,7 @@ void is::SystemIntegration::loop()
             else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                 width = event.window.data1;
                 height = event.window.data2;
+                renderer->resize(width, height);
             }
         }
     }
