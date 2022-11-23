@@ -104,7 +104,7 @@ if(GL_FOUND AND SDL_FOUND)
   target_compile_definitions(imgui-sdl-gl PRIVATE GL SDL)
   add_library(Imgui::imgui-sdl-gl ALIAS imgui-sdl-gl)
 endif()
-if(VULKAN_FOUND AND SDL_FOUND)
+if(VULKAN_FOUND AND SDL_FOUND AND VULKAN_ENABLED)
   CPMAddPackage(NAME vk-bootstrap
     GITHUB_REPOSITORY "charles-lunarg/vk-bootstrap"
     GIT_TAG master) # todo: pick a fixed revision
